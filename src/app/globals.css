@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+    font-family: 'General Sans';
+    src: url('/src/assets/fonts/GeneralSans_Complete/GeneralSans_Complete/Fonts/TTF/GeneralSans-Variable.ttf') format('truetype');
+}
