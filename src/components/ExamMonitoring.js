@@ -33,7 +33,7 @@ const ExamMonitoring = () => {
         <div className='mx-[240px]'>
             <div className='relative flex justify-between'>
                 <div className=' flex flex-col items-center gap-6'>
-                    <Webcam className='w-[620px] h-[310px] object-fill' />
+                    <Webcam className='w-[640px] h-[310px]' />
                     <p>Violation Count: 0 / 10</p>
                     <div className='flex gap-3'>
                         <button onClick={increaseFontSize} className='border px-4 py-2 rounded-sm'>+</button>
@@ -116,19 +116,19 @@ const ExamMonitoring = () => {
                     <div className='flex flex-col gap-3'>
                         <div className="flex items-center px-6 py-4 rounded-lg border hover:bg-blue-50 transition cursor-pointer">
                             <input id="default-radio-1" type="radio" value="Binary Tree" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 " />
-                            <label for="default-radio-1" className="ms-2 text-[18px] font-medium leading-6 tracking-[2.5%] cursor-pointer">Binary Tree</label>
+                            <label htmlFor="default-radio-1" className="ms-2 text-[18px] font-medium leading-6 tracking-[2.5%] cursor-pointer">Binary Tree</label>
                         </div>
                         <div className="flex items-center px-6 py-4 rounded-lg border hover:bg-blue-50 transition cursor-pointer">
                             <input id="default-radio-2" type="radio" value="Neural Network" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 " />
-                            <label for="default-radio-2" className="ms-2 text-[18px] font-medium leading-6 tracking-[2.5%] cursor-pointer">Neural Network</label>
+                            <label htmlFor="default-radio-2" className="ms-2 text-[18px] font-medium leading-6 tracking-[2.5%] cursor-pointer">Neural Network</label>
                         </div>
                         <div className="flex items-center px-6 py-4 rounded-lg border hover:bg-blue-50 transition cursor-pointer">
                             <input id="default-radio-3" type="radio" value="Blockchain" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 " />
-                            <label for="default-radio-3" className="ms-2 text-[18px] font-medium leading-6 tracking-[2.5%] cursor-pointer">Blockchain</label>
+                            <label htmlFor="default-radio-3" className="ms-2 text-[18px] font-medium leading-6 tracking-[2.5%] cursor-pointer">Blockchain</label>
                         </div>
                         <div className="flex items-center px-6 py-4 rounded-lg border hover:bg-blue-50 transition cursor-pointer">
                             <input id="default-radio-4" type="radio" value="Quantum Circuit" name="default-radio" className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 " />
-                            <label for="default-radio-4" className="ms-2 text-[18px] font-medium leading-6 tracking-[2.5%] cursor-pointer">Quantum Circuit</label>
+                            <label htmlFor="default-radio-4" className="ms-2 text-[18px] font-medium leading-6 tracking-[2.5%] cursor-pointer">Quantum Circuit</label>
                         </div>
                     </div>
                     <button className='py-3 px-[42px] bg-black text-white w-fit rounded-lg my-[36px]'>Next</button>
