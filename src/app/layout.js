@@ -1,6 +1,8 @@
+// src/app/layout.js
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Head from "next/head";
+import RootLayoutClient from './rootLayoutClient';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +22,11 @@ export default function RootLayout({ children }) {
         <meta name="keywords" content={metadata.keywords} />
         <meta name="author" content={metadata.author} />
       </Head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <RootLayoutClient>
+          {children}
+        </RootLayoutClient>
+      </body>
     </html>
   );
 }

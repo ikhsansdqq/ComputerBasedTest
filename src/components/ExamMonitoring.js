@@ -4,6 +4,7 @@ import Webcam from 'react-webcam'
 import Soal1 from '../assets/images/Soal1.png'
 import Image from 'next/image'
 import { RiArrowUpSLine, RiArrowDownSLine  } from "react-icons/ri";
+import { useSelector } from 'react-redux';
 const ExamMonitoring = () => {
     const webcamRef = useRef < Webcam > (null)
     const [isOpenClientInfo, setIsOpenClientInfo] = useState(false);
@@ -11,6 +12,7 @@ const ExamMonitoring = () => {
     var [valueFontSize, setValueFontSize] = useState(20)
     var [valueLineHeight, setValueLineHeight] = useState(32)
     var [valueLetter, setValueLetter] = useState(2.5)
+    const webcam = useSelector(state => state.webcam);
 
     const toggleClientInformation = () => {
         setIsOpenClientInfo(!isOpenClientInfo);
@@ -33,7 +35,7 @@ const ExamMonitoring = () => {
         <div className='mx-[240px]'>
             <div className='relative flex justify-between'>
                 <div className=' flex flex-col items-center gap-6'>
-                    <Webcam className='w-[640px] h-[310px]' />
+                    {webcam ? <Webcam className='w-[640px] h-[310px]' /> : ''}
                     <p>Violation Count: 0 / 10</p>
                     <div className='flex gap-3'>
                         <button onClick={increaseFontSize} className='border px-4 py-2 rounded-sm'>+</button>
