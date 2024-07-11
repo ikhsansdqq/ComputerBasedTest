@@ -6,3 +6,9 @@
     font-family: 'General Sans';
     src: url('/src/assets/fonts/GeneralSans_Complete/GeneralSans_Complete/Fonts/TTF/GeneralSans-Variable.ttf') format('truetype');
 }
+
+#webcam,
+#canvas {
+    display: block;
+    margin: 0 auto;
+}
