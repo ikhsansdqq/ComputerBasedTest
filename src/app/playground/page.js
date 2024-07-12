@@ -1,9 +1,10 @@
-import Webcam from "@/components/Webcam";
+"use client"
 
-export default function Page() {
+export default function PlayGround() {
     return (
         <div>
-            <Webcam />
+            <h1>PlayGround</h1>
+            <p>For playground only</p>
         </div>
-    )
+    );
 }
