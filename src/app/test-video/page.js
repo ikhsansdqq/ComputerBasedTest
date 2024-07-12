@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import '@tensorflow/tfjs';
 import '@mediapipe/face_detection';
 import '@tensorflow/tfjs-core';
@@ -11,28 +11,13 @@ const FaceDetectionPage = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const modelRef = useRef(null);
-  const [modelLoaded, setModelLoaded] = useState(false);
 
   useEffect(() => {
-    const setupCamera = async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480 },
-        audio: false,
-      });
-
-      videoRef.current.srcObject = stream;
-      return new Promise((resolve) => {
-        videoRef.current.onloadedmetadata = () => {
-          resolve();
-        };
-      });
-    };
-
     const loadModel = async () => {
       const detectorConfig = {
         modelType: faceDetection.SupportedModels.MediaPipeFaceDetector,
         maxFaces: 1,
-        runtime: 'mediapipe', // Use tfjs runtime for consistency
+        runtime: 'mediapipe',
         solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection',
       };
 
@@ -41,8 +26,6 @@ const FaceDetectionPage = () => {
         detectorConfig
       );
 
-      setModelLoaded(true);
-      console.log(modelLoaded);
       console.log('Model Loaded!');
     };
 
@@ -87,11 +70,16 @@ const FaceDetectionPage = () => {
     };
 
     const runFaceDetection = async () => {
-      await setupCamera();
       await loadModel();
 
       videoRef.current.play();
-      setInterval(detectFaces, 100);
+      videoRef.current.addEventListener('play', () => {
+        const intervalId = setInterval(detectFaces, 100);
+
+        videoRef.current.addEventListener('ended', () => {
+          clearInterval(intervalId);
+        });
+      });
     };
 
     runFaceDetection();
@@ -103,12 +91,15 @@ const FaceDetectionPage = () => {
       <div className='flex justify-center items-center relative w-[640px] h-[480px] mx-auto'>
         <video
           ref={videoRef}
-          autoPlay
-          playsInline
           width="640"
           height="480"
-          className='-scale-x-100 absolute top-0 left-0'
-        />
+          autoPlay={true}
+          className='absolute top-0 left-0'
+          controls
+        >
+          <source src={'/chuangy61.mp4'} type="video/mp4" autoPlay={true} />
+          Your browser does not support the video tag.
+        </video>
         <canvas
           ref={canvasRef}
           width="640"
@@ -118,8 +109,6 @@ const FaceDetectionPage = () => {
       </div>
       <p className='text-center mt-4'>Faces detected: 0/1</p>
       <p className='text-center'>Violation count: 0/10</p>
-
-      <p>Model loaded? {modelLoaded}</p>
     </div>
   );
 };
