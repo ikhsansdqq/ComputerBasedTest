@@ -15,13 +15,13 @@ const FaceDetectionPage = () => {
      useEffect(() => {
           const setupCamera = async () => {
                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 720, height: 560 },
+                    video: { width: 640, height: 480 },
                     audio: false,
                });
 
                videoRef.current.srcObject = stream;
                return new Promise((resolve) => {
-                    videoRef.current.loadedmetadata = () => {
+                    videoRef.current.onloadedmetadata = () => {
                          resolve();
                     };
                });
@@ -30,36 +30,72 @@ const FaceDetectionPage = () => {
           const loadModel = async () => {
                const detectorConfig = {
                     modelType: faceDetection.SupportedModels.MediaPipeFaceDetector,
-                    runtime: 'tfjs',
+                    maxFaces: 1,
+                    runtime: 'mediapipe', // Use tfjs runtime for consistency
+                    solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection',
                };
+
                modelRef.current = await faceDetection.createDetector(
                     faceDetection.SupportedModels.MediaPipeFaceDetector,
                     detectorConfig
                );
+
+               console.log('Model Loaded!');
+          };
+
+          const drawKeypoints = (ctx, keypoints) => {
+               keypoints.forEach((keypoint) => {
+                    ctx.beginPath();
+                    ctx.arc(keypoint[0], keypoint[1], 3, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'blue';
+                    ctx.fill();
+               });
           };
 
           const detectFaces = async () => {
                if (!modelRef.current || !videoRef.current) return;
 
-               const predictions = await modelRef.current.estimateFaces(videoRef.current);
+               const estimationConfig = { flipHorizontal: true, predictIrises: false, returnTensors: false };
+               const predictions = await modelRef.current.estimateFaces(videoRef.current, estimationConfig);
 
                const canvas = canvasRef.current;
                const ctx = canvas.getContext('2d');
                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+               ctx.save();
+               ctx.scale(-1, 1);
+               ctx.translate(-canvas.width, 0);
+
                if (predictions.length > 0) {
                     predictions.forEach((prediction) => {
-                         const start = prediction.box.startPoint;
-                         const end = prediction.box.endPoint;
-                         const size = [end[0] - start[0], end[1] - start[1]];
+                         if (prediction.box) {
+                              const { topLeft, bottomRight } = prediction.box;
+                              if (topLeft && bottomRight) {
+                                   const start = topLeft;
+                                   const end = bottomRight;
+                                   const size = [end[0] - start[0], end[1] - start[1]];
 
-                         ctx.beginPath();
-                         ctx.rect(start[0], start[1], size[0], size[1]);
-                         ctx.linewidth = 2;
-                         ctx.strokeStyle = 'red';
-                         ctx.stroke();
+                                   ctx.beginPath();
+                                   ctx.rect(start[0], start[1], size[0], size[1]);
+                                   ctx.lineWidth = 2;
+                                   ctx.strokeStyle = 'red';
+                                   ctx.stroke();
+
+                                   if (prediction.keypoints) {
+                                        drawKeypoints(ctx, prediction.keypoints);
+                                   } else {
+                                        console.warn('No keypoints found in prediction:', prediction);
+                                   }
+                              } else {
+                                   console.warn('Invalid box coordinates in prediction:', prediction.box);
+                              }
+                         } else {
+                              console.warn('Invalid prediction box:', prediction.box);
+                         }
                     });
                }
+
+               ctx.restore();
           };
 
           const runFaceDetection = async () => {
@@ -71,14 +107,29 @@ const FaceDetectionPage = () => {
           };
 
           runFaceDetection();
-
      }, []);
 
      return (
-          <div>
-               <h1>Real-Time Face Detection</h1>
-               <video ref={videoRef} autoPlay playsInline width="640" height="480" />
-               <canvas ref={canvasRef} width="640" height="480" />
+          <div className='max-w-[960px] mx-auto py-6'>
+               <h1 className='text-3xl font-semibold mb-4 text-center'>Real-Time Face Detection</h1>
+               <div className='flex justify-center items-center relative w-[640px] h-[480px] mx-auto'>
+                    <video
+                         ref={videoRef}
+                         autoPlay
+                         playsInline
+                         width="640"
+                         height="480"
+                         className='-scale-x-100 absolute top-0 left-0'
+                    />
+                    <canvas
+                         ref={canvasRef}
+                         width="640"
+                         height="480"
+                         className='absolute top-0 left-0'
+                    />
+               </div>
+               <p className='text-center mt-4'>Faces detected: 0/1</p>
+               <p className='text-center'>Violation count: 0/10</p>
           </div>
      );
 };
