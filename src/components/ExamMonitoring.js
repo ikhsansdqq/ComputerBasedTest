@@ -1,12 +1,16 @@
 "use client"
-import React, { useRef, useState } from 'react'
+
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 import Webcam from 'react-webcam'
+import * as cocoSsd from '@tensorflow-models/coco-ssd'
+import '@tensorflow/tfjs'
 import Soal1 from '../assets/images/Soal1.png'
 import Image from 'next/image'
-import { RiArrowUpSLine, RiArrowDownSLine  } from "react-icons/ri";
+import { RiArrowUpSLine, RiArrowDownSLine } from "react-icons/ri";
 
 const ExamMonitoring = () => {
     const webcamRef = useRef < Webcam > (null)
+    const canvasRef = useRef(null)
     const [isOpenClientInfo, setIsOpenClientInfo] = useState(false);
     const [isOpenMLInfo, setIsOpenMLInfo] = useState(false);
     var [valueFontSize, setValueFontSize] = useState(20)
@@ -30,6 +34,52 @@ const ExamMonitoring = () => {
         setValueLineHeight(prevValue => (prevValue >= 12 ? prevValue - 4 : prevValue));
         setValueLetter(prevValue => (prevValue >= 0 ? prevValue - 0.5 : prevValue));
     };
+
+    const detect = useCallback(async (net) => {
+        if (
+            typeof webcamRef.current !== "undefined" &&
+            webcamRef.current !== null &&
+            webcamRef.current.video.readyState === 4
+        ) {
+            const video = webcamRef.current.video;
+            const videoWidth = webcamRef.current.video.videoWidth;
+            const videoHeight = webcamRef.current.video.videoHeight;
+
+            webcamRef.current.video.width = videoWidth;
+            webcamRef.current.video.height = videoHeight;
+
+            const obj = await net.detect(video);
+
+            const ctx = canvasRef.current.getContext("2d");
+            ctx.clearRect(0, 0, videoWidth, videoHeight);
+
+            obj.forEach((prediction) => {
+                if (prediction.class === 'person') {
+                    const [x, y, width, height] = prediction.bbox;
+                    ctx.strokeStyle = "#00FF00";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(x, y, width, height);
+                    ctx.fillStyle = "#00FF00";
+                    ctx.fillText(
+                        `${Math.round(prediction.score * 100)}%`,
+                        x,
+                        y > 10 ? y - 5 : y + 10
+                    );
+                }
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        const loadModel = async () => {
+            const net = await cocoSsd.load();
+            setInterval(() => {
+                detect(net);
+            }, 100);
+        };
+        loadModel();
+    }, [detect]);
+
     return (
         <div className='mx-[240px]'>
             <div className='relative flex justify-between'>
@@ -46,7 +96,7 @@ const ExamMonitoring = () => {
                                 <div className="flex justify-between items-center w-full">
                                     <div className=" text-[20px] text-black font-semibold">Client Information</div>
                                     <button onClick={toggleClientInformation} className="text-[24px] focus:outline-none">
-                                        {isOpenClientInfo ? <RiArrowUpSLine/> : <RiArrowDownSLine/>}
+                                        {isOpenClientInfo ? <RiArrowUpSLine /> : <RiArrowDownSLine />}
                                     </button>
                                 </div>
                                 {isOpenClientInfo && (
@@ -78,7 +128,7 @@ const ExamMonitoring = () => {
                                 <div className="flex justify-between items-center w-full">
                                     <div className=" text-[20px]  font-semibold">Machine Learning Information</div>
                                     <button onClick={toggleMLInformation} className=" focus:outline-none text-[28px]">
-                                        {isOpenMLInfo ? <RiArrowUpSLine/> : <RiArrowDownSLine />}
+                                        {isOpenMLInfo ? <RiArrowUpSLine /> : <RiArrowDownSLine />}
                                     </button>
                                 </div>
                                 {isOpenMLInfo && (
@@ -109,7 +159,7 @@ const ExamMonitoring = () => {
                     <h1 className='font-semibold text-[24px] leading-8 tracking-[2.5%] mb-6'>Question 1 of 5</h1>
                     <div className='flex flex-col gap-6 mb-6'>
                         <p className={`text-[${valueFontSize}px] leading-[${valueLineHeight}] tracking-[${valueLetter}%]`}>Describe the process of how a basic cryptographic system works, including the roles of encryption and decryption, keys, and algorithms. Illustrate your answer with an example of how data is encrypted and decrypted using both symmetric and asymmetric key encryption. Finally, explain the challenges associated with key management and distribution in cryptographic systems.</p>
-                        <Image src={Soal1} />
+                        <Image src={Soal1} alt='soal1' />
                         <p className={`text-[${valueFontSize}px] leading-[${valueLineHeight}] tracking-[${valueLetter}%]`}>Asymmetric Key Encryption: Uses a pair of keys – a public key for encryption and a private key for decryption. The public key can be shared openly, but the private key must be kept secure.</p>
                         <p className={`text-[${valueFontSize}px] leading-[${valueLineHeight}] tracking-[${valueLetter}%]`}>Which property of a cryptographic system ensures that a message cannot be altered without detection?</p>
                     </div>
