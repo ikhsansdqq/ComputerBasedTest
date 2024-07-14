@@ -3,15 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "start": "yarn dev",
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "test": "jest"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@reduxjs/toolkit": "^2.2.6",
-=======
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/drawing_utils": "^0.3.1675466124",
     "@mediapipe/face_detection": "^0.4.1646425229",
@@ -20,7 +19,6 @@
     "@mediapipe/tasks-vision": "^0.10.14",
     "@tensorflow-models/coco-ssd": "^2.2.3",
     "@tensorflow-models/face-detection": "^1.0.2",
->>>>>>> master
     "@tensorflow-models/mobilenet": "^2.1.1",
     "@tensorflow/tfjs": "^4.20.0",
     "@tensorflow/tfjs-backend-webgl": "^4.20.0",
