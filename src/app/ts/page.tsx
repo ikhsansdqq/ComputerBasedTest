@@ -196,7 +196,7 @@ const TSHome = () => {
   return (
     <div>
       <DeviceCheckModal isOpen={showDeviceCheck} onClose={() => setShowDeviceCheck(false)} />
-      
+
       {/* Navbar */}
       <nav className="bg-gray-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
@@ -214,9 +214,36 @@ const TSHome = () => {
         {/* Left Column */}
         <div className="md:w-1/2 lg:pr-4">
           {/* Hero Section */}
-          <section className="bg-blue-600 text-white text-center py-20 rounded">
+          <section className="bg-blue-700 text-white text-center py-16 rounded">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Welcome to Computer Based Test</h1>
             <p className="text-lg md:text-xl">Efficient, Reliable, and Secure Online Testing</p>
+
+            <div className='flex gap-3 justify-center mt-8 items-center'>
+              {/* Violation Counter */}
+              <div className="bg-red-500 text-white p-4 rounded-full">
+                Violations: {violations}
+              </div>
+
+              {/* End Session Button */}
+              <div className="">
+                <button
+                  onClick={onEndSessionClick}
+                  className="bg-blue-500 text-white p-4 rounded-full"
+                >
+                  End Session
+                </button>
+              </div>
+
+              {/* Show Device Check Button */}
+              <div className="">
+                <button
+                  onClick={() => setShowDeviceCheck(true)}
+                  className="bg-green-500 text-white p-4 rounded-full hover:bg-green-600"
+                >
+                  Start Device Check
+                </button>
+              </div>
+            </div>
           </section>
 
           {/* Accordion */}
@@ -274,30 +301,15 @@ const TSHome = () => {
             audio={false}
             ref={webcamRef}
             screenshotFormat="image/jpeg"
-            className="w-full rounded shadow-md"
+            className="w-full rounded shadow-md -scale-x-100"
           />
-          <canvas ref={canvasRef} className={`absolute top-0 left-0 h-full w-full ${!faceDetected ? 'hidden' : ''}`} />
+          <canvas ref={canvasRef} className={`absolute top-0 left-0 h-full w-full -scale-x-100 ${!faceDetected ? 'hidden' : ''}`} />
           {!faceDetected && (
-            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 text-white">
+            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center -scale-x-100 bg-gray-800 bg-opacity-50 text-white">
               <p>No face detected</p>
             </div>
           )}
         </div>
-      </div>
-
-      {/* Violation Counter */}
-      <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-full">
-        Violations: {violations}
-      </div>
-
-      {/* End Session Button */}
-      <div className="fixed bottom-4 right-4 mr-16">
-        <button
-          onClick={onEndSessionClick}
-          className="bg-blue-500 text-white p-4 rounded-full"
-        >
-          End Session
-        </button>
       </div>
 
       {/* Violation Images */}
@@ -343,16 +355,6 @@ const TSHome = () => {
           </div>
         </div>
       )}
-
-      {/* Show Device Check Button */}
-      <div className="fixed bottom-4 left-4">
-        <button
-          onClick={() => setShowDeviceCheck(true)}
-          className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600"
-        >
-          Start Device Check
-        </button>
-      </div>
     </div>
   );
 };
