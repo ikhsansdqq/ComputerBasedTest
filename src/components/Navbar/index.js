@@ -49,6 +49,7 @@ const Navbar = () => {
   return (
     <div className='flex justify-between mx-[240px] items-center py-8'>
       <Image
+        alt='Logo'
         src={Logo}
         height={48}
         width={172}

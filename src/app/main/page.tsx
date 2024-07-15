@@ -1,6 +1,10 @@
 "use client";
 
+import Link from 'next/link';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect } from 'react';
+
 import Webcam from 'react-webcam';
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
@@ -73,7 +77,9 @@ const TSHome = () => {
       sessionStorage.removeItem('violationImages');
     }
     setViolations(0);
-    setViolationImages([]);
+    setViolationImages([
+      
+    ]);
     setShowEndSessionConfirm(false);
   };
 
@@ -200,11 +206,11 @@ const TSHome = () => {
       {/* Navbar */}
       <nav className="bg-gray-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <div className="text-white text-lg font-bold">CBT</div>
+          <Link href={'/'}><div className="text-white text-lg font-bold">CBT</div></Link>
           <div className="hidden md:flex space-x-4">
-            <a href="#home" className="text-white">Home</a>
-            <a href="#about" className="text-white">About</a>
-            <a href="#contact" className="text-white">Contact</a>
+            <a href="/" className="text-white">Home</a>
+            <a href="/" className="text-white">About</a>
+            <a href="/" className="text-white">Contact</a>
           </div>
         </div>
       </nav>
@@ -317,7 +323,7 @@ const TSHome = () => {
         <h2 className="text-2xl font-bold text-center mb-4">Violation Images</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {violationImages.map((imageSrc, index) => (
-            <img key={index} src={imageSrc} alt={`Violation ${index + 1}`} className="w-full rounded shadow-md" />
+            <Image width={360} height={240} key={index} src={imageSrc} alt={`Violation ${index + 1}`} className="w-full rounded shadow-md" />
           ))}
         </div>
       </div>
@@ -359,4 +365,6 @@ const TSHome = () => {
   );
 };
 
-export default TSHome;
+export default dynamic(() => Promise.resolve(TSHome), {
+  ssr: true,
+});

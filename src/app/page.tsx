@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const HomePage = () => {
   return (
@@ -13,10 +14,10 @@ const HomePage = () => {
           </p>
         </div>
         <div className="flex flex-col space-y-4">
-        <Link href="/ts">
+        <Link href="/main">
             <div className="group border rounded-lg p-6 bg-white shadow hover:shadow-lg transform hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
               <div className="flex items-center space-x-4">
-                <img src="/ts_logo.png" alt="Typescript Page" className="h-12 w-12 rounded" />
+                <Image width={240} height={240} src="/ts_logo.png" alt="Typescript Page" className="h-12 w-12 rounded" />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Typescript Page</h3>
                   <p className="text-sm text-gray-600">
@@ -29,7 +30,7 @@ const HomePage = () => {
           {/* <Link href="/js">
             <div className="group border rounded-lg p-6 bg-white shadow hover:shadow-lg transform hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
               <div className="flex items-center space-x-4">
-                <img src="/js_logo.png" alt="Javascript Page" className="h-12 w-12 rounded" />
+                <Image width={240} height={240} src="/js_logo.png" alt="Javascript Page" className="h-12 w-12 rounded" />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Javascript Page</h3>
                   <p className="text-sm text-gray-600">
