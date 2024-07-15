@@ -1,11 +1,13 @@
-"use client";
-
 import { useEffect, useState } from 'react';
 
-const DeviceCheckModal = ({ isOpen, onClose }) => {
+interface DeviceCheckModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const DeviceCheckModal: React.FC<DeviceCheckModalProps> = ({ isOpen, onClose }) => {
   const [cameraAvailable, setCameraAvailable] = useState(false);
   const [webGLSupport, setWebGLSupport] = useState(false);
-  const [openCLSupport, setOpenCLSupport] = useState(false);
   const [internetSpeed, setInternetSpeed] = useState<number | null>(null);
 
   useEffect(() => {
@@ -17,9 +19,6 @@ const DeviceCheckModal = ({ isOpen, onClose }) => {
     // Check WebGL support
     const canvas = document.createElement('canvas');
     setWebGLSupport(!!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-
-    // Check OpenCL support (this is a simplified check)
-    setOpenCLSupport(typeof WebCL !== 'undefined');
 
     // Check internet speed
     const image = new Image();
@@ -36,7 +35,7 @@ const DeviceCheckModal = ({ isOpen, onClose }) => {
     image.src = 'https://via.placeholder.com/5000';
   }, []);
 
-  const allChecksPassed = cameraAvailable && webGLSupport && openCLSupport && internetSpeed !== null && internetSpeed > 1;
+  const allChecksPassed = cameraAvailable && webGLSupport && internetSpeed !== null && internetSpeed > 1;
 
   return isOpen ? (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
@@ -50,10 +49,6 @@ const DeviceCheckModal = ({ isOpen, onClose }) => {
           <li className="flex justify-between items-center">
             <span>WebGL Support</span>
             <span>{webGLSupport ? '✔️' : '❌'}</span>
-          </li>
-          <li className="flex justify-between items-center">
-            <span>OpenCL Support</span>
-            <span>{openCLSupport ? '✔️' : '❌'}</span>
           </li>
           <li className="flex justify-between items-center">
             <span>Checking Internet Speed</span>

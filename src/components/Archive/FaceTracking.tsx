@@ -22,8 +22,6 @@
 //         if (context && results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
 //           context.clearRect(0, 0, canvas.width, canvas.height);
 //           const landmarks = results.multiFaceLandmarks[0];
-
-//           // Draw bounding box
 //           const boundingBox = landmarks.reduce(
 //             (box, landmark) => {
 //               return {
@@ -44,30 +42,6 @@
 //             (boundingBox.maxX - boundingBox.minX) * canvas.width,
 //             (boundingBox.maxY - boundingBox.minY) * canvas.height
 //           );
-
-//           // Draw points for eyes and ears
-//           const drawLandmark = (index: number, color: string) => {
-//             const x = landmarks[index].x * canvas.width;
-//             const y = landmarks[index].y * canvas.height;
-//             context.fillStyle = color;
-//             context.beginPath();
-//             context.arc(x, y, 3, 0, 2 * Math.PI);
-//             context.fill();
-//           };
-
-//           // Left eye landmarks
-//           const leftEyeIndices = [33, 133, 145, 153, 160, 159, 158, 157, 173, 246];
-//           leftEyeIndices.forEach(index => drawLandmark(index, 'blue'));
-
-//           // Right eye landmarks
-//           const rightEyeIndices = [362, 263, 387, 373, 380, 374, 373, 390, 388, 466];
-//           rightEyeIndices.forEach(index => drawLandmark(index, 'green'));
-
-//           // Left ear landmark
-//           drawLandmark(234, 'yellow');
-
-//           // Right ear landmark
-//           drawLandmark(454, 'orange');
 //         }
 //       }
 //     };
@@ -116,10 +90,9 @@
 //         {/* Left Column */}
 //         <div className="md:w-1/2 lg:pr-4">
 //           {/* Hero Section */}
-//           <section className="bg-blue-600 text-white text-center py-12 rounded">
+//           <section className="bg-blue-600 text-white text-center py-20 rounded">
 //             <h1 className="text-3xl md:text-4xl font-bold mb-4">Welcome to Computer Based Test</h1>
 //             <p className="text-lg md:text-xl">Efficient, Reliable, and Secure Online Testing</p>
-//             <p className={'text-base'}>Created by @ikhsansdq</p>
 //           </section>
 
 //           {/* Accordion */}
@@ -168,4 +141,3 @@
 // };
 
 // export default FaceTracking;
-

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
-import DeviceCheckModal from '@/components/DeviceCheckModal';
+import DeviceCheckModal from '../../components/DeviceCheckModal';
 
 const TSHome = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -175,7 +175,9 @@ const TSHome = () => {
       if (webcamRef.current?.video) {
         const camera = new camUtils.Camera(webcamRef.current.video, {
           onFrame: async () => {
-            await faceMeshInstance.send({ image: webcamRef.current?.video });
+            if (webcamRef.current?.video) {
+              await faceMeshInstance.send({ image: webcamRef.current.video });
+            }
           },
           width: 1280,
           height: 720,
@@ -258,7 +260,7 @@ const TSHome = () => {
               Initially, CBT faced skepticism regarding its reliability and security. However, as technology advanced, so did the methods for ensuring the integrity of online exams. Proctoring solutions, such as the one we are developing, leverage advanced algorithms and facial recognition to monitor test-takers in real-time, ensuring that the exams are conducted fairly and securely.
             </p>
             <p className="text-justify mt-4">
-              Today, CBT is widely accepted and continues to evolve. With the integration of AI and machine learning, the future of CBT holds immense potential for adaptive testing. These advancements promise to provide personalized assessments tailored to each individual's learning pace and style, making education more inclusive and effective.
+              Today, CBT is widely accepted and continues to evolve. With the integration of AI and machine learning, the future of CBT holds immense potential for adaptive testing. These advancements promise to provide personalized assessments tailored to each individual&apos;s learning pace and style, making education more inclusive and effective.
             </p>
             <p className="text-justify mt-4">
               As we continue to innovate and improve our CBT platform, we remain committed to enhancing the testing experience for both examiners and examinees. Our goal is to make assessments more accessible, efficient, and secure, paving the way for a brighter future in education.
