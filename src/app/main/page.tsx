@@ -6,11 +6,13 @@ import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect } from 'react';
 
 import Webcam from 'react-webcam';
+
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
-import DeviceCheckModal from '../../components/DeviceCheckModal';
 
 const TSHome = () => {
+  const DeviceCheckModal = dynamic(() => import('../../components/DeviceCheckModal'), { ssr: false });
+
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [faceDetected, setFaceDetected] = useState<boolean>(false);
   const [violations, setViolations] = useState<number>(0);
@@ -18,8 +20,10 @@ const TSHome = () => {
   const [violationImages, setViolationImages] = useState<string[]>([]);
   const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
   const [showDeviceCheck, setShowDeviceCheck] = useState<boolean>(false);
+
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const violationTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const toggleAccordion = (index: number) => {
@@ -78,7 +82,7 @@ const TSHome = () => {
     }
     setViolations(0);
     setViolationImages([
-      
+
     ]);
     setShowEndSessionConfirm(false);
   };
@@ -187,6 +191,7 @@ const TSHome = () => {
           },
           width: 1280,
           height: 720,
+          facingMode: "user",
         });
         camera.start();
       }
@@ -366,5 +371,5 @@ const TSHome = () => {
 };
 
 export default dynamic(() => Promise.resolve(TSHome), {
-  ssr: true,
+  ssr: false,
 });
