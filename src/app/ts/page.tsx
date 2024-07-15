@@ -269,16 +269,16 @@ const TSHome = () => {
         </div>
 
         {/* Right Column */}
-        <div className="md:w-1/2 justify-center items-center relative">
+        <div className="md:w-1/2 h-fit justify-center items-center relative">
           <Webcam
             audio={false}
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             className="w-full rounded shadow-md"
           />
-          <canvas ref={canvasRef} className={`absolute top-0 left-0 w-full ${!faceDetected ? 'hidden' : ''}`} />
+          <canvas ref={canvasRef} className={`absolute top-0 left-0 h-full w-full ${!faceDetected ? 'hidden' : ''}`} />
           {!faceDetected && (
-            <div className="absolute top-0 left-0 w-full flex items-center justify-center bg-gray-800 bg-opacity-50 text-white">
+            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 text-white">
               <p>No face detected</p>
             </div>
           )}

@@ -20,7 +20,7 @@ const HomePage = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Typescript Page</h3>
                   <p className="text-sm text-gray-600">
-                    Let&apos;s start collaborating with your teammates and unlock the full access of Dosehost. Hope you&apos;ll enjoy.
+                    Let&apos;s start collaborating with your teammates and unlock the full access of CBT Test Page. Hope you&apos;ll enjoy.
                   </p>
                 </div>
               </div>
