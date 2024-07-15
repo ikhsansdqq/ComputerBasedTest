@@ -8,9 +8,9 @@ import * as camUtils from '@mediapipe/camera_utils';
 const TSHome = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [faceDetected, setFaceDetected] = useState<boolean>(false);
-  const [violations, setViolations] = useState<number>(parseInt(sessionStorage.getItem('violations') || '0', 10));
+  const [violations, setViolations] = useState<number>(0);
   const [cheating, setCheating] = useState<boolean>(false);
-  const [violationImages, setViolationImages] = useState<string[]>(JSON.parse(sessionStorage.getItem('violationImages') || '[]'));
+  const [violationImages, setViolationImages] = useState<string[]>([]);
   const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,7 +31,9 @@ const TSHome = () => {
   const incrementViolations = () => {
     setViolations(prev => {
       const newViolations = prev + 1;
-      sessionStorage.setItem('violations', newViolations.toString());
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('violations', newViolations.toString());
+      }
       if (newViolations >= 10) {
         handleCheating();
       } else {
@@ -54,7 +56,9 @@ const TSHome = () => {
       if (imageSrc) {
         setViolationImages(prev => {
           const newImages = [...prev, imageSrc];
-          sessionStorage.setItem('violationImages', JSON.stringify(newImages));
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('violationImages', JSON.stringify(newImages));
+          }
           return newImages;
         });
       }
@@ -62,8 +66,10 @@ const TSHome = () => {
   };
 
   const endSession = () => {
-    sessionStorage.removeItem('violations');
-    sessionStorage.removeItem('violationImages');
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('violations');
+      sessionStorage.removeItem('violationImages');
+    }
     setViolations(0);
     setViolationImages([]);
     setShowEndSessionConfirm(false);
@@ -78,6 +84,13 @@ const TSHome = () => {
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedViolations = parseInt(sessionStorage.getItem('violations') || '0', 10);
+      const savedViolationImages = JSON.parse(sessionStorage.getItem('violationImages') || '[]');
+      setViolations(savedViolations);
+      setViolationImages(savedViolationImages);
+    }
+
     if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
       const onResults = (results: faceMesh.Results) => {
         if (canvasRef.current) {
@@ -241,7 +254,7 @@ const TSHome = () => {
               Initially, CBT faced skepticism regarding its reliability and security. However, as technology advanced, so did the methods for ensuring the integrity of online exams. Proctoring solutions, such as the one we are developing, leverage advanced algorithms and facial recognition to monitor test-takers in real-time, ensuring that the exams are conducted fairly and securely.
             </p>
             <p className="text-justify mt-4">
-              Today, CBT is widely accepted and continues to evolve. With the integration of AI and machine learning, the future of CBT holds immense potential for adaptive testing. These advancements promise to provide personalized assessments tailored to each individual`$apos`s learning pace and style, making education more inclusive and effective.
+              Today, CBT is widely accepted and continues to evolve. With the integration of AI and machine learning, the future of CBT holds immense potential for adaptive testing. These advancements promise to provide personalized assessments tailored to each individual's learning pace and style, making education more inclusive and effective.
             </p>
             <p className="text-justify mt-4">
               As we continue to innovate and improve our CBT platform, we remain committed to enhancing the testing experience for both examiners and examinees. Our goal is to make assessments more accessible, efficient, and secure, paving the way for a brighter future in education.
@@ -250,16 +263,16 @@ const TSHome = () => {
         </div>
 
         {/* Right Column */}
-        <div className="md:w-1/2 justify-center items-center h-fit relative">
+        <div className="md:w-1/2 justify-center items-center relative">
           <Webcam
             audio={false}
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             className="w-full rounded shadow-md"
           />
-          <canvas ref={canvasRef} className={`absolute top-0 h-full left-0 w-full ${!faceDetected ? 'hidden' : ''}`} />
+          <canvas ref={canvasRef} className={`absolute top-0 left-0 w-full ${!faceDetected ? 'hidden' : ''}`} />
           {!faceDetected && (
-            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 text-white">
+            <div className="absolute top-0 left-0 w-full flex items-center justify-center bg-gray-800 bg-opacity-50 text-white">
               <p>No face detected</p>
             </div>
           )}
