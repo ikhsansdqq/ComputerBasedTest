@@ -306,7 +306,7 @@ const TSHome = () => {
           <canvas ref={canvasRef} className={`absolute top-0 left-0 h-full w-full -scale-x-100 ${!faceDetected ? 'hidden' : ''}`} />
           {!faceDetected && (
             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center -scale-x-100 bg-gray-800 bg-opacity-50 text-white">
-              <p>No face detected</p>
+              <p className='-scale-x-100'>No face detected</p>
             </div>
           )}
         </div>
