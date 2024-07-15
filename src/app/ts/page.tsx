@@ -5,7 +5,7 @@ import Webcam from 'react-webcam';
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
 
-const FaceTrackingV1_1 = () => {
+const TSHome = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [faceDetected, setFaceDetected] = useState<boolean>(false);
   const [violations, setViolations] = useState<number>(parseInt(sessionStorage.getItem('violations') || '0', 10));
@@ -328,4 +328,4 @@ const FaceTrackingV1_1 = () => {
   );
 };
 
-export default FaceTrackingV1_1;
+export default TSHome;
