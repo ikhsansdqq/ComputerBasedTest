@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
+import DeviceCheckModal from '@/components/DeviceCheckModal';
 
 const TSHome = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -12,6 +13,7 @@ const TSHome = () => {
   const [cheating, setCheating] = useState<boolean>(false);
   const [violationImages, setViolationImages] = useState<string[]>([]);
   const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
+  const [showDeviceCheck, setShowDeviceCheck] = useState<boolean>(false);
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const violationTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -191,6 +193,8 @@ const TSHome = () => {
 
   return (
     <div>
+      <DeviceCheckModal isOpen={showDeviceCheck} onClose={() => setShowDeviceCheck(false)} />
+      
       {/* Navbar */}
       <nav className="bg-gray-800 p-4">
         <div className="container mx-auto flex justify-between items-center">
@@ -263,16 +267,16 @@ const TSHome = () => {
         </div>
 
         {/* Right Column */}
-        <div className="md:w-1/2 h-fit justify-center items-center relative">
+        <div className="md:w-1/2 justify-center items-center relative">
           <Webcam
             audio={false}
             ref={webcamRef}
             screenshotFormat="image/jpeg"
-            className="w-full rounded shadow-md -scale-x-100"
+            className="w-full rounded shadow-md"
           />
-          <canvas ref={canvasRef} className={`absolute top-0 left-0 h-full w-full -scale-x-100 ${!faceDetected ? 'hidden' : ''}`} />
+          <canvas ref={canvasRef} className={`absolute top-0 left-0 w-full ${!faceDetected ? 'hidden' : ''}`} />
           {!faceDetected && (
-            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-50 text-white">
+            <div className="absolute top-0 left-0 w-full flex items-center justify-center bg-gray-800 bg-opacity-50 text-white">
               <p>No face detected</p>
             </div>
           )}
@@ -337,6 +341,16 @@ const TSHome = () => {
           </div>
         </div>
       )}
+
+      {/* Show Device Check Button */}
+      <div className="fixed bottom-4 left-4">
+        <button
+          onClick={() => setShowDeviceCheck(true)}
+          className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600"
+        >
+          Start Device Check
+        </button>
+      </div>
     </div>
   );
 };
