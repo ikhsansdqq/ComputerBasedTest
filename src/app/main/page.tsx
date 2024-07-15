@@ -104,6 +104,7 @@ const TSHome = () => {
     }
 
     if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
+      console.log('navigator:', navigator);
       const onResults = (results: faceMesh.Results) => {
         if (canvasRef.current) {
           const canvas = canvasRef.current;
