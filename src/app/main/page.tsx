@@ -4,15 +4,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useState, useRef, useEffect } from 'react';
-
 import Webcam from 'react-webcam';
-
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
 
-const TSHome = () => {
-  const DeviceCheckModal = dynamic(() => import('../../components/DeviceCheckModal'), { ssr: false });
+const DeviceCheckModal = dynamic(() => import('../../components/DeviceCheckModal'), { ssr: false });
 
+const TSHome = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [faceDetected, setFaceDetected] = useState<boolean>(false);
   const [violations, setViolations] = useState<number>(0);
@@ -23,7 +21,6 @@ const TSHome = () => {
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
   const violationTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const toggleAccordion = (index: number) => {
@@ -81,9 +78,7 @@ const TSHome = () => {
       sessionStorage.removeItem('violationImages');
     }
     setViolations(0);
-    setViolationImages([
-
-    ]);
+    setViolationImages([]);
     setShowEndSessionConfirm(false);
   };
 
@@ -104,7 +99,6 @@ const TSHome = () => {
     }
 
     if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
-      console.log('navigator:', navigator);
       const onResults = (results: faceMesh.Results) => {
         if (canvasRef.current) {
           const canvas = canvasRef.current;
