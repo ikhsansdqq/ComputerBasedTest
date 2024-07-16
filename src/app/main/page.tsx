@@ -8,7 +8,7 @@ import Webcam from 'react-webcam';
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
 
-const DeviceCheckModal = dynamic(() => import('../../components/DeviceCheckModal'), { ssr: false });
+// const DeviceCheckModal = dynamic(() => import('../../components/DeviceCheckModal'), { ssr: false });
 
 const TSHome = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -17,7 +17,7 @@ const TSHome = () => {
   const [cheating, setCheating] = useState<boolean>(false);
   const [violationImages, setViolationImages] = useState<string[]>([]);
   const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
-  const [showDeviceCheck, setShowDeviceCheck] = useState<boolean>(false);
+  // const [showDeviceCheck, setShowDeviceCheck] = useState<boolean>(false);
 
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,9 +38,7 @@ const TSHome = () => {
   const incrementViolations = () => {
     setViolations(prev => {
       const newViolations = prev + 1;
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('violations', newViolations.toString());
-      }
+      sessionStorage.setItem('violations', newViolations.toString());
       if (newViolations >= 10) {
         handleCheating();
       } else {
@@ -63,9 +61,7 @@ const TSHome = () => {
       if (imageSrc) {
         setViolationImages(prev => {
           const newImages = [...prev, imageSrc];
-          if (typeof window !== 'undefined') {
-            sessionStorage.setItem('violationImages', JSON.stringify(newImages));
-          }
+          sessionStorage.setItem('violationImages', JSON.stringify(newImages));
           return newImages;
         });
       }
@@ -73,10 +69,8 @@ const TSHome = () => {
   };
 
   const endSession = () => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('violations');
-      sessionStorage.removeItem('violationImages');
-    }
+    sessionStorage.removeItem('violations');
+    sessionStorage.removeItem('violationImages');
     setViolations(0);
     setViolationImages([]);
     setShowEndSessionConfirm(false);
@@ -96,6 +90,8 @@ const TSHome = () => {
       const savedViolationImages = JSON.parse(sessionStorage.getItem('violationImages') || '[]');
       setViolations(savedViolations);
       setViolationImages(savedViolationImages);
+
+      console.log('navigator saved violations:', savedViolations);
     }
 
     if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
@@ -190,6 +186,8 @@ const TSHome = () => {
         });
         camera.start();
       }
+
+      console.log('navigator face detection:', faceMeshInstance);
     }
 
     return () => {
@@ -201,7 +199,7 @@ const TSHome = () => {
 
   return (
     <div>
-      <DeviceCheckModal isOpen={showDeviceCheck} onClose={() => setShowDeviceCheck(false)} />
+      {/* <DeviceCheckModal isOpen={showDeviceCheck} onClose={() => setShowDeviceCheck(false)} /> */}
 
       {/* Navbar */}
       <nav className="bg-gray-800 p-4">
@@ -241,14 +239,14 @@ const TSHome = () => {
               </div>
 
               {/* Show Device Check Button */}
-              <div className="">
+              {/* <div className="">
                 <button
                   onClick={() => setShowDeviceCheck(true)}
                   className="bg-green-500 text-white p-4 rounded-full hover:bg-green-600"
                 >
                   Start Device Check
                 </button>
-              </div>
+              </div> */}
             </div>
           </section>
 
