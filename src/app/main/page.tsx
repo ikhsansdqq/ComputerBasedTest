@@ -19,6 +19,9 @@ const TSHome = () => {
   const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
   const [showDeviceCheck, setShowDeviceCheck] = useState<boolean>(false);
 
+  const [pageURL, setPageURL] = useState("");
+  const [isNativeShare, setNativeShare] = useState(false);
+
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const violationTimeout = useRef<NodeJS.Timeout | null>(null);

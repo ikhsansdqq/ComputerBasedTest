@@ -129,7 +129,7 @@
 
 "@mediapipe/tasks-vision@^0.10.14":
   version "0.10.14"
-  resolved "https://registry.yarnpkg.com/@mediapipe/tasks-vision/-/tasks-vision-0.10.14.tgz#16c5ddc513408f2a416ccc6ce8ccc797ee02da3b"
+  resolved "https://registry.npmjs.org/@mediapipe/tasks-vision/-/tasks-vision-0.10.14.tgz"
   integrity sha512-vOifgZhkndgybdvoRITzRkIueWWSiCKuEUXXK6Q4FaJsFvRJuwgg++vqFUMlL0Uox62U5aEXFhHxlhV7Ja5e3Q==
 
 "@next/env@14.2.4":
@@ -217,7 +217,7 @@
 
 "@reduxjs/toolkit@^2.2.6":
   version "2.2.6"
-  resolved "https://registry.yarnpkg.com/@reduxjs/toolkit/-/toolkit-2.2.6.tgz#4a8356dad9d0c1ab255607a555d492168e0e3bc1"
+  resolved "https://registry.npmjs.org/@reduxjs/toolkit/-/toolkit-2.2.6.tgz"
   integrity sha512-kH0r495c5z1t0g796eDQAkYbEQ3a1OLYN9o8jQQVZyKyw367pfRGS+qZLkHYvFHiUUdafpoSlQ2QYObIApjPWA==
   dependencies:
     immer "^10.0.3"
@@ -245,7 +245,7 @@
 
 "@tensorflow-models/coco-ssd@^2.2.3":
   version "2.2.3"
-  resolved "https://registry.yarnpkg.com/@tensorflow-models/coco-ssd/-/coco-ssd-2.2.3.tgz#3825286569076d6788199c9cb89fb2fa31f7d2f2"
+  resolved "https://registry.npmjs.org/@tensorflow-models/coco-ssd/-/coco-ssd-2.2.3.tgz"
   integrity sha512-iCLGktG/XhHbP6h2FWxqCKMp/Px0lCp6MZU1fjNhjDHeaWEC9G7S7cZrnPXsfH+NewCM53YShlrHnknxU3SQig==
 
 "@tensorflow-models/face-detection@^1.0.2":
@@ -355,7 +355,7 @@
 
 "@types/node@^20.14.10":
   version "20.14.10"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.14.10.tgz#a1a218290f1b6428682e3af044785e5874db469a"
+  resolved "https://registry.npmjs.org/@types/node/-/node-20.14.10.tgz"
   integrity sha512-MdiXf+nDuMvY0gJKxyfZ7/6UFsETO7mGKF54MVD/ekJS6HdFtpZFBgrh6Pseu64XTb2MLyFPlbW6hj8HYRQNOQ==
   dependencies:
     undici-types "~5.26.4"
@@ -372,12 +372,12 @@
 
 "@types/prop-types@*":
   version "15.7.12"
-  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.12.tgz#12bb1e2be27293c1406acb6af1c3f3a1481d98c6"
+  resolved "https://registry.npmjs.org/@types/prop-types/-/prop-types-15.7.12.tgz"
   integrity sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==
 
 "@types/react@^18.3.3":
   version "18.3.3"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.3.tgz#9679020895318b0915d7a3ab004d92d33375c45f"
+  resolved "https://registry.npmjs.org/@types/react/-/react-18.3.3.tgz"
   integrity sha512-hti/R0pS0q1/xx+TsI73XIqk26eBsISZ2R0wUijXIngRK9R/e7Xw/cXVxQK7R5JjW+SV4zGcn5hXjudkN/pLIw==
   dependencies:
     "@types/prop-types" "*"
@@ -390,7 +390,7 @@
 
 "@types/use-sync-external-store@^0.0.3":
   version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@types/use-sync-external-store/-/use-sync-external-store-0.0.3.tgz#b6725d5f4af24ace33b36fafd295136e75509f43"
+  resolved "https://registry.npmjs.org/@types/use-sync-external-store/-/use-sync-external-store-0.0.3.tgz"
   integrity sha512-EwmlvuaxPNej9+T4v5AuBPJa2x2UOJVdjCtDHgcDqitUeOtjnJKJ+apYjVcAoBEMjKW1VVFGZLUb5+qqa09XFA==
 
 "@typescript-eslint/parser@^5.4.2 || ^6.0.0 || 7.0.0 - 7.2.0":
@@ -813,7 +813,7 @@ cssesc@^3.0.0:
 
 csstype@^3.0.2:
   version "3.1.3"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.3.tgz#d80ff294d114fb0e6ac500fbf85b60137d7eff81"
+  resolved "https://registry.npmjs.org/csstype/-/csstype-3.1.3.tgz"
   integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
 
 damerau-levenshtein@^1.0.8:
@@ -1606,7 +1606,7 @@ ignore@^5.2.0:
 
 immer@^10.0.3:
   version "10.1.1"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-10.1.1.tgz#206f344ea372d8ea176891545ee53ccc062db7bc"
+  resolved "https://registry.npmjs.org/immer/-/immer-10.1.1.tgz"
   integrity sha512-s2MPrmjovJcoMaHtx6K11Ra7oD05NT97w1IC5zpMkT6Atjr7H8LjaDd81iIxUYpMKSRRNMJE703M1Fhr/TctHw==
 
 import-fresh@^3.2.1:
@@ -2192,7 +2192,7 @@ once@^1.3.0:
 
 opencv.js@^1.2.1:
   version "1.2.1"
-  resolved "https://registry.yarnpkg.com/opencv.js/-/opencv.js-1.2.1.tgz#9e89fd669a749f80574ba5d4615a5ff3e3c09a16"
+  resolved "https://registry.npmjs.org/opencv.js/-/opencv.js-1.2.1.tgz"
   integrity sha512-+ji5Pk3eyz+RRSeZr2kLZNJpjsKoGyPJOjFWng7+Cuq9ylHakBqJMxDGlBW1+qdju3k8DadWOiHJ6JaF28UpKA==
 
 optionator@^0.9.3:
@@ -2392,7 +2392,7 @@ react-is@^16.13.1:
 
 react-redux@^9.1.2:
   version "9.1.2"
-  resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-9.1.2.tgz#deba38c64c3403e9abd0c3fbeab69ffd9d8a7e4b"
+  resolved "https://registry.npmjs.org/react-redux/-/react-redux-9.1.2.tgz"
   integrity sha512-0OA4dhM1W48l3uzmv6B7TXPCGmokUU4p1M44DGN2/D9a1FjVPukVjER1PcPX97jIg6aUeLq1XJo1IpfbgULn0w==
   dependencies:
     "@types/use-sync-external-store" "^0.0.3"
@@ -2400,7 +2400,7 @@ react-redux@^9.1.2:
 
 react-webcam@^7.2.0:
   version "7.2.0"
-  resolved "https://registry.yarnpkg.com/react-webcam/-/react-webcam-7.2.0.tgz#64141c4c7bdd3e956620500187fa3fcc77e1fd49"
+  resolved "https://registry.npmjs.org/react-webcam/-/react-webcam-7.2.0.tgz"
   integrity sha512-xkrzYPqa1ag2DP+2Q/kLKBmCIfEx49bVdgCCCcZf88oF+0NPEbkwYk3/s/C7Zy0mhM8k+hpdNkBLzxg8H0aWcg==
 
 react@^18:
@@ -2426,12 +2426,12 @@ readdirp@~3.6.0:
 
 redux-thunk@^3.1.0:
   version "3.1.0"
-  resolved "https://registry.yarnpkg.com/redux-thunk/-/redux-thunk-3.1.0.tgz#94aa6e04977c30e14e892eae84978c1af6058ff3"
+  resolved "https://registry.npmjs.org/redux-thunk/-/redux-thunk-3.1.0.tgz"
   integrity sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==
 
 redux@^5.0.1:
   version "5.0.1"
-  resolved "https://registry.yarnpkg.com/redux/-/redux-5.0.1.tgz#97fa26881ce5746500125585d5642c77b6e9447b"
+  resolved "https://registry.npmjs.org/redux/-/redux-5.0.1.tgz"
   integrity sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w==
 
 reflect.getprototypeof@^1.0.4:
@@ -2469,7 +2469,7 @@ require-directory@^2.1.1:
 
 reselect@^5.1.0:
   version "5.1.1"
-  resolved "https://registry.yarnpkg.com/reselect/-/reselect-5.1.1.tgz#c766b1eb5d558291e5e550298adb0becc24bb72e"
+  resolved "https://registry.npmjs.org/reselect/-/reselect-5.1.1.tgz"
   integrity sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w==
 
 resolve-from@^4.0.0:
@@ -2944,7 +2944,7 @@ typed-array-length@^1.0.6:
 
 typescript@^5.5.3:
   version "5.5.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.5.3.tgz#e1b0a3c394190838a0b168e771b0ad56a0af0faa"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-5.5.3.tgz"
   integrity sha512-/hreyEujaB0w76zKo6717l3L0o/qEUtRgdvUBvlkhoWeOVMjMuHNHk0BRBzikzuGDqNmPQbg5ifMEqsHLiIUcQ==
 
 unbox-primitive@^1.0.2:
@@ -2971,7 +2971,7 @@ uri-js@^4.2.2:
 
 use-sync-external-store@^1.0.0:
   version "1.2.2"
-  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.2.tgz#c3b6390f3a30eba13200d2302dcdf1e7b57b2ef9"
+  resolved "https://registry.npmjs.org/use-sync-external-store/-/use-sync-external-store-1.2.2.tgz"
   integrity sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==
 
 util-deprecate@^1.0.2:

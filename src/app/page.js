@@ -14,7 +14,7 @@ const HomePage = () => {
           </p>
         </div>
         <div className="flex flex-col space-y-4">
-        <Link href="/main">
+          <Link href="/main">
             <div className="group border rounded-lg p-6 bg-white shadow hover:shadow-lg transform hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
               <div className="flex items-center space-x-4">
                 <Image width={240} height={240} src="/ts_logo.png" alt="Typescript Page" className="h-12 w-12 rounded" />

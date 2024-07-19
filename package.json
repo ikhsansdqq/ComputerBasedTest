@@ -3,10 +3,10 @@
   "version": "0.1.5",
   "private": true,
   "scripts": {
-    "start": "yarn dev",
-    "dev": "next dev",
+    "dev": "node server.js",
     "build": "next build",
-    "lint": "eslint .",
+    "start": "NODE_ENV=production node server.js",
+    "lint": "next lint",
     "test": "jest"
   },
   "dependencies": {
