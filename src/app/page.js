@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
@@ -11,54 +11,34 @@ import * as camUtils from '@mediapipe/camera_utils';
 // const DeviceCheckModal = dynamic(() => import('../../components/DeviceCheckModal'), { ssr: false });
 
 const TSHome = () => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [faceDetected, setFaceDetected] = useState<boolean>(false);
-  const [violations, setViolations] = useState<number>(0);
-  const [cheating, setCheating] = useState<boolean>(false);
-  const [violationImages, setViolationImages] = useState<string[]>([]);
-  const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
-  // const [showDeviceCheck, setShowDeviceCheck] = useState<boolean>(false);
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [faceDetected, setFaceDetected] = useState(false);
+  const [violations, setViolations] = useState(0);
+  const [cheating, setCheating] = useState(false);
+  const [violationImages, setViolationImages] = useState([]);
+  const [showEndSessionConfirm, setShowEndSessionConfirm] = useState(false);
+  // const [showDeviceCheck, setShowDeviceCheck] = useState(false);
 
   const [pageURL, setPageURL] = useState("");
   const [isNativeShare, setNativeShare] = useState(false);
 
-  const webcamRef = useRef<Webcam>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const violationTimeout = useRef<NodeJS.Timeout | null>(null);
+  const webcamRef = useRef(null);
+  const canvasRef = useRef(null);
+  const violationTimeout = useRef(null);
 
-  const toggleAccordion = (index: number) => {
+  const toggleAccordion = useCallback((index) => {
     setActiveIndex(activeIndex === index ? null : index);
-  };
+  }, [activeIndex]);
 
-  const handleCheating = () => {
+  const handleCheating = useCallback(() => {
     setCheating(true);
     if (webcamRef.current) {
       webcamRef.current.video?.pause();
-      (webcamRef.current.video?.srcObject as MediaStream)?.getTracks().forEach(track => track.stop());
+      (webcamRef.current.video?.srcObject)?.getTracks().forEach(track => track.stop());
     }
-  };
+  }, []);
 
-  const incrementViolations = () => {
-    setViolations(prev => {
-      const newViolations = prev + 1;
-      sessionStorage.setItem('violations', newViolations.toString());
-      if (newViolations >= 10) {
-        handleCheating();
-      } else {
-        captureImage();
-      }
-      return newViolations;
-    });
-  };
-
-  const resetViolationTimeout = () => {
-    if (violationTimeout.current) {
-      clearTimeout(violationTimeout.current);
-    }
-    violationTimeout.current = setTimeout(incrementViolations, 5000);
-  };
-
-  const captureImage = () => {
+  const captureImage = useCallback(() => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
@@ -69,23 +49,27 @@ const TSHome = () => {
         });
       }
     }
-  };
+  }, []);
 
-  const endSession = () => {
-    sessionStorage.removeItem('violations');
-    sessionStorage.removeItem('violationImages');
-    setViolations(0);
-    setViolationImages([]);
-    setShowEndSessionConfirm(false);
-  };
+  const incrementViolations = useCallback(() => {
+    setViolations(prev => {
+      const newViolations = prev + 1;
+      sessionStorage.setItem('violations', newViolations.toString());
+      if (newViolations >= 10) {
+        handleCheating();
+      } else {
+        captureImage();
+      }
+      return newViolations;
+    });
+  }, [handleCheating, captureImage]);
 
-  const onEndSessionClick = () => {
-    setShowEndSessionConfirm(true);
-  };
-
-  const onCancelEndSession = () => {
-    setShowEndSessionConfirm(false);
-  };
+  const resetViolationTimeout = useCallback(() => {
+    if (violationTimeout.current) {
+      clearTimeout(violationTimeout.current);
+    }
+    violationTimeout.current = setTimeout(incrementViolations, 5000);
+  }, [incrementViolations]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -98,7 +82,7 @@ const TSHome = () => {
     }
 
     if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
-      const onResults = (results: faceMesh.Results) => {
+      const onResults = (results) => {
         if (canvasRef.current) {
           const canvas = canvasRef.current;
           const context = canvas.getContext('2d');
@@ -132,7 +116,7 @@ const TSHome = () => {
             );
 
             // Draw points for eyes and ears
-            const drawLandmark = (index: number, color: string) => {
+            const drawLandmark = (index, color) => {
               const x = landmarks[index].x * canvas.width;
               const y = landmarks[index].y * canvas.height;
               context.fillStyle = color;
@@ -198,7 +182,23 @@ const TSHome = () => {
         clearTimeout(violationTimeout.current);
       }
     };
-  }, []);
+  }, [resetViolationTimeout, incrementViolations]);
+
+  const endSession = () => {
+    sessionStorage.removeItem('violations');
+    sessionStorage.removeItem('violationImages');
+    setViolations(0);
+    setViolationImages([]);
+    setShowEndSessionConfirm(false);
+  };
+
+  const onEndSessionClick = () => {
+    setShowEndSessionConfirm(true);
+  };
+
+  const onCancelEndSession = () => {
+    setShowEndSessionConfirm(false);
+  };
 
   return (
     <div>
