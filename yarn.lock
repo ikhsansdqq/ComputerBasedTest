@@ -137,10 +137,10 @@
   resolved "https://registry.npmjs.org/@next/env/-/env-14.2.4.tgz"
   integrity sha512-3EtkY5VDkuV2+lNmKlbkibIJxcO4oIHEhBWne6PaAp+76J9KoSsGvNikp6ivzAT8dhhBMYrm6op2pS1ApG0Hzg==
 
-"@next/eslint-plugin-next@14.2.4":
-  version "14.2.4"
-  resolved "https://registry.npmjs.org/@next/eslint-plugin-next/-/eslint-plugin-next-14.2.4.tgz"
-  integrity sha512-svSFxW9f3xDaZA3idQmlFw7SusOuWTpDTAeBlO3AEPDltrraV+lqs7mAc6A27YdnpQVVIA3sODqUAAHdWhVWsA==
+"@next/eslint-plugin-next@14.2.5":
+  version "14.2.5"
+  resolved "https://registry.npmjs.org/@next/eslint-plugin-next/-/eslint-plugin-next-14.2.5.tgz"
+  integrity sha512-LY3btOpPh+OTIpviNojDpUdIbHW9j0JBYBjsIp8IxtDFfYFyORvw3yNq6N231FVqQA7n7lwaf7xHbVJlA1ED7g==
   dependencies:
     glob "10.3.10"
 
@@ -346,14 +346,7 @@
     "@types/node" "*"
     form-data "^4.0.0"
 
-"@types/node@*":
-  version "20.14.9"
-  resolved "https://registry.npmjs.org/@types/node/-/node-20.14.9.tgz"
-  integrity sha512-06OCtnTXtWOZBJlRApleWndH4JsRVs1pDCc8dLSQp+7PpUpX3ePdHyeNSFTeSe7FtKyQkrlPvHwJOW3SLd8Oyg==
-  dependencies:
-    undici-types "~5.26.4"
-
-"@types/node@^20.14.10":
+"@types/node@*", "@types/node@^20.14.10":
   version "20.14.10"
   resolved "https://registry.npmjs.org/@types/node/-/node-20.14.10.tgz"
   integrity sha512-MdiXf+nDuMvY0gJKxyfZ7/6UFsETO7mGKF54MVD/ekJS6HdFtpZFBgrh6Pseu64XTb2MLyFPlbW6hj8HYRQNOQ==
@@ -1109,12 +1102,12 @@ escape-string-regexp@^4.0.0:
   resolved "https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz"
   integrity sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==
 
-eslint-config-next@14.2.4:
-  version "14.2.4"
-  resolved "https://registry.npmjs.org/eslint-config-next/-/eslint-config-next-14.2.4.tgz"
-  integrity sha512-Qr0wMgG9m6m4uYy2jrYJmyuNlYZzPRQq5Kvb9IDlYwn+7yq6W6sfMNFgb+9guM1KYwuIo6TIaiFhZJ6SnQ/Efw==
+eslint-config-next@^14.2.5:
+  version "14.2.5"
+  resolved "https://registry.yarnpkg.com/eslint-config-next/-/eslint-config-next-14.2.5.tgz#cdd43d89047eb7391ba25445d5855b4600b6adb9"
+  integrity sha512-zogs9zlOiZ7ka+wgUnmcM0KBEDjo4Jis7kxN1jvC0N4wynQ2MIx/KBkg4mVF63J5EK4W0QMCn7xO3vNisjaAoA==
   dependencies:
-    "@next/eslint-plugin-next" "14.2.4"
+    "@next/eslint-plugin-next" "14.2.5"
     "@rushstack/eslint-patch" "^1.3.3"
     "@typescript-eslint/parser" "^5.4.2 || ^6.0.0 || 7.0.0 - 7.2.0"
     eslint-import-resolver-node "^0.3.6"
@@ -2189,11 +2182,6 @@ once@^1.3.0:
   integrity sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==
   dependencies:
     wrappy "1"
-
-opencv.js@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/opencv.js/-/opencv.js-1.2.1.tgz"
-  integrity sha512-+ji5Pk3eyz+RRSeZr2kLZNJpjsKoGyPJOjFWng7+Cuq9ylHakBqJMxDGlBW1+qdju3k8DadWOiHJ6JaF28UpKA==
 
 optionator@^0.9.3:
   version "0.9.4"
