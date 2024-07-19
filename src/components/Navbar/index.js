@@ -4,7 +4,7 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 import Logo from '../../assets/images/Logo.png'
 import { useDispatch } from 'react-redux'
-import { turnOffWebcam, turnOnWebcam } from '../../../redux'
+import { turnOffWebcam, turnOnWebcam } from '../../archive/redux'
 
 const Navbar = () => {
   const dispatch = useDispatch()
