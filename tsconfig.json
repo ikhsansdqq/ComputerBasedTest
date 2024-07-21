@@ -37,7 +37,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-, "src/archive/main/page.js", "src/archive/page.js", "src/app/page.js"  ],
+, "src/archive/main/page.js", "src/archive/page.js", "src/app/old-page.js"  ],
   "exclude": [
     "node_modules"
   ]
