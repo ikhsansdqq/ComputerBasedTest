@@ -1,12 +1,11 @@
-import Head from 'next/head';
-import ExamMonitoring from '../components/ExamMonitoring';
-import Navbar from '@/components/Navbar';
+import dynamic from "next/dynamic";
 
-export default function Home() {
-  return (
-    <>
-      <Navbar/>
-      <ExamMonitoring/>
-    </>
-  );
-}
+const ClientOnlyComponent = dynamic(() => import("@/components/ClientOnlyComponent"), {
+  ssr: false,
+});
+
+const ScriptPage = () => {
+  return <ClientOnlyComponent />;
+};
+
+export default ScriptPage;

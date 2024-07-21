@@ -8,6 +8,7 @@ import Soal1 from '../assets/images/Soal1.png'
 import Image from 'next/image'
 import { RiArrowUpSLine, RiArrowDownSLine  } from "react-icons/ri";
 import { useSelector } from 'react-redux';
+
 const ExamMonitoring = () => {
     const webcamRef = useRef < Webcam > (null)
     const canvasRef = useRef(null)

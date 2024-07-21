@@ -2,7 +2,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Head from "next/head";
-import RootLayoutClient from './rootLayoutClient';
+// import RootLayoutClient from '../archive/rootLayoutClient';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,9 +23,9 @@ export default function RootLayout({ children }) {
         <meta name="author" content={metadata.author} />
       </Head>
       <body className={inter.className}>
-        <RootLayoutClient>
           {children}
-        </RootLayoutClient>
+        {/* <RootLayoutClient>
+        </RootLayoutClient> */}
       </body>
     </html>
   );

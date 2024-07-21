@@ -1,8 +1,7 @@
 import React from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 
-const NotFoundPage = () => {
+const LoadingScreen = () => {
   const articles = [
     { title: 'Did You Know?', content: 'The first computer virus was created in 1983.' },
     { title: 'Did You Know?', content: 'The first 1GB hard drive, announced in 1980, weighed over 500 pounds.' },
@@ -15,16 +14,15 @@ const NotFoundPage = () => {
       <div className="bg-white shadow-md rounded-lg overflow-hidden flex max-w-4xl w-full">
         {/* Left Side */}
         <div className="w-1/2 p-8">
-          <Image width={240} height={240} src="/figma-logo.png" alt="Figma Logo" className="h-12 w-12 mb-6 rounded shadow-md" />
-          <h2 className="text-2xl font-semibold mb-4">404 - Page Not Found</h2>
-          <p className="text-gray-600 mb-2">Sorry, the page you are looking for does not exist.</p>
+          <Image width={240} height={240} src="/figma-logo.png" alt="Figma Logo" className="h-12 w-12 mb-6" />
+          <h2 className="text-2xl font-semibold mb-4">Figma</h2>
+          <p className="text-gray-600 mb-2">Design tools</p>
           <p className="text-gray-400 text-sm">
-            © 2024-2025 ikhsansdq. All rights reserved.
+            © 1992-2022 Adobe. All rights reserved.
             <br />
-            Platform created using NextJS 14 by Ikhsan Assidiqie. For more details and legal notices, go to the About Project screen.
+            Artwork by Happy Tri Milliarta. For more details and legal notices, go to the About Figma screen.
           </p>
-
-          <Link href='/'><button className='mt-8 w-full px-4 py-3 rounded text-white bg-blue-600 hover:shadow-lg hover:bg-blue-700 transition duration-300'>Back to home</button></Link>
+          <p className="mt-6 text-gray-500">Initializing MediaCore</p>
         </div>
 
         {/* Right Side */}
@@ -44,4 +42,4 @@ const NotFoundPage = () => {
   );
 };
 
-export default NotFoundPage;
+export default LoadingScreen;
