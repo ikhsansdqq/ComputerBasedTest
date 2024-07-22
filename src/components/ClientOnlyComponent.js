@@ -1,6 +1,5 @@
 "use client";
 
-// ClientOnlyComponent.js
 import { useState, useRef, useEffect } from "react";
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
@@ -12,9 +11,30 @@ const ClientOnlyComponent = () => {
     const [faceDetected, setFaceDetected] = useState(false);
     const [noFaceCounter, setNoFaceCounter] = useState(0);
     const [multipleFacesCounter, setMultipleFacesCounter] = useState(0);
-
+    const [violationImages, setViolationImages] = useState([]);
     const [lastFaceDetectedTime, setLastFaceDetectedTime] = useState(Date.now());
     const [facesCount, setFacesCount] = useState(0);
+
+    const violationTimeout = useRef(null);
+
+    const captureImage = () => {
+        if (webCamRef.current && webCamRef.current.video) {
+            const canvas = document.createElement('canvas');
+            canvas.width = webCamRef.current.video.videoWidth;
+            canvas.height = webCamRef.current.video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(webCamRef.current.video, 0, 0, canvas.width, canvas.height);
+            return canvas.toDataURL('image/png');
+        }
+        return null;
+    };
+
+    const handleViolation = () => {
+        const imageSrc = captureImage();
+        if (imageSrc) {
+            setViolationImages(images => [...images, imageSrc]);
+        }
+    };
 
     const onResults = (results) => {
         if (canvasRef.current) {
@@ -29,6 +49,8 @@ const ClientOnlyComponent = () => {
                 if (faces === 1) {
                     setLastFaceDetectedTime(Date.now());
                     setFaceDetected(true);
+                    clearTimeout(violationTimeout.current);
+                    violationTimeout.current = null;
 
                     const landmarks = results.multiFaceLandmarks[0];
 
@@ -73,13 +95,30 @@ const ClientOnlyComponent = () => {
                     drawLandmark(234, 'yellow');
                     drawLandmark(454, 'yellow');
                 } else if (faces > 1) {
-                    setMultipleFacesCounter(prev => prev + 1);
                     setFaceDetected(false);
+                    if (!violationTimeout.current) {
+                        violationTimeout.current = setTimeout(() => {
+                            setMultipleFacesCounter(prev => prev + 1);
+                            handleViolation();
+                        }, 4000);
+                    }
                 } else {
                     setFaceDetected(false);
+                    if (!violationTimeout.current) {
+                        violationTimeout.current = setTimeout(() => {
+                            setNoFaceCounter(prev => prev + 1);
+                            handleViolation();
+                        }, 4000);
+                    }
                 }
             } else {
                 setFaceDetected(false);
+                if (!violationTimeout.current) {
+                    violationTimeout.current = setTimeout(() => {
+                        setNoFaceCounter(prev => prev + 1);
+                        handleViolation();
+                    }, 4000);
+                }
             }
         }
     };
@@ -149,8 +188,9 @@ const ClientOnlyComponent = () => {
 
     useEffect(() => {
         const checkFacePresence = () => {
-            if (!faceDetected && (Date.now() - lastFaceDetectedTime) > 5000) {
+            if (!faceDetected && (Date.now() - lastFaceDetectedTime) > 4000) {
                 setNoFaceCounter(prev => prev + 1);
+                handleViolation();
                 setLastFaceDetectedTime(Date.now());
             }
         };
@@ -173,6 +213,11 @@ const ClientOnlyComponent = () => {
             <div className="relative z-10 p-4 bg-white bg-opacity-75">
                 <p>No Face Detected Counter: {noFaceCounter}</p>
                 <p>Multiple Faces Detected Counter: {multipleFacesCounter}</p>
+                <div className="grid grid-cols-3 gap-4">
+                    {violationImages.map((src, index) => (
+                        <img key={index} src={src} alt={`Violation ${index}`} className="w-full h-auto" />
+                    ))}
+                </div>
             </div>
         </div>
     );
