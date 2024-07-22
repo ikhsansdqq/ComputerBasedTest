@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
 
+import Image from "next/image";
+
 const ClientOnlyComponent = () => {
     const webCamRef = useRef(null);
     const canvasRef = useRef(null);
@@ -215,7 +217,7 @@ const ClientOnlyComponent = () => {
                 <p>Multiple Faces Detected Counter: {multipleFacesCounter}</p>
                 <div className="grid grid-cols-3 gap-4">
                     {violationImages.map((src, index) => (
-                        <img key={index} src={src} alt={`Violation ${index}`} className="w-full h-auto" />
+                        <Image key={index} src={src} alt={`Violation ${index}`} className="w-full h-auto" width={120} height={120} />
                     ))}
                 </div>
             </div>
