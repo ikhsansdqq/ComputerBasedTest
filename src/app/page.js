@@ -10,7 +10,7 @@ const ClientOnlyComponent = dynamic(() => import("@/components/ClientOnlyCompone
 const ScriptPage = () => {
   return (
     <div>
-      <Navbar />
+      {/* <Navbar /> */}
       <ClientOnlyComponent />;
     </div>
   )
