@@ -9,6 +9,7 @@ import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
 
 const TSHome = () => {
+
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [faceDetected, setFaceDetected] = useState<boolean>(false);
     const [violations, setViolations] = useState<number>(0);
@@ -473,6 +474,7 @@ const TSHome = () => {
                     </div>
                 </div>
             )}
+
         </div>
     );
 };
