@@ -16,12 +16,15 @@ const TSHome = () => {
     const [violationImages, setViolationImages] = useState<string[]>([]);
     const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
     const [multipleFacesDetected, setMultipleFacesDetected] = useState<boolean>(false);
+    const [cameraAccessDenied, setCameraAccessDenied] = useState<boolean>(false);
+    const [downStareWarnings, setDownStareWarnings] = useState<number>(0);
 
     const webcamRef = useRef<Webcam>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const violationTimeout = useRef<NodeJS.Timeout | null>(null);
     const faceOffScreenTimeout = useRef<NodeJS.Timeout | null>(null);
     const multipleFacesTimeout = useRef<NodeJS.Timeout | null>(null);
+    const downStareWarningTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const toggleAccordion = (index: number) => {
         setActiveIndex(activeIndex === index ? null : index);
@@ -29,9 +32,9 @@ const TSHome = () => {
 
     const handleCheating = () => {
         setCheating(true);
-        if (webcamRef.current) {
-            webcamRef.current.video?.pause();
-            (webcamRef.current.video?.srcObject as MediaStream)?.getTracks().forEach(track => track.stop());
+        if (webcamRef.current && webcamRef.current.video) {
+            webcamRef.current.video.pause();
+            (webcamRef.current.video.srcObject as MediaStream)?.getTracks().forEach(track => track.stop());
         }
     };
 
@@ -45,6 +48,17 @@ const TSHome = () => {
                 captureImage();
             }
             return newViolations;
+        });
+    };
+
+    const incrementDownStareWarnings = () => {
+        setDownStareWarnings(prev => {
+            const newWarnings = prev + 1;
+            if (newWarnings >= 3) {
+                incrementViolations();
+                setDownStareWarnings(0); // reset warnings after converting to a violation
+            }
+            return newWarnings;
         });
     };
 
@@ -68,8 +82,16 @@ const TSHome = () => {
         }
         multipleFacesTimeout.current = setTimeout(() => {
             incrementViolations();
-            setMultipleFacesDetected(false);
         }, 3000);
+    };
+
+    const resetDownStareWarningTimeout = () => {
+        if (downStareWarningTimeout.current) {
+            clearTimeout(downStareWarningTimeout.current);
+        }
+        downStareWarningTimeout.current = setTimeout(() => {
+            incrementDownStareWarnings();
+        }, 8000);
     };
 
     const captureImage = () => {
@@ -121,85 +143,97 @@ const TSHome = () => {
                     if (context && results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                         setFaceDetected(true);
                         resetViolationTimeout();
-                        const landmarks = results.multiFaceLandmarks[0];
+                        results.multiFaceLandmarks.forEach(landmarks => {
+                            // Check face orientation
+                            const noseTip = landmarks[1];
+                            const leftEyeOuter = landmarks[33];
+                            const rightEyeOuter = landmarks[263];
 
-                        // Check face orientation
-                        const noseTip = landmarks[1];
-                        const leftEyeOuter = landmarks[33];
-                        const rightEyeOuter = landmarks[263];
+                            const faceTurnedRight = noseTip.x < leftEyeOuter.x;
+                            const faceTurnedLeft = noseTip.x > rightEyeOuter.x;
+                            const faceTurnedUp = noseTip.y < leftEyeOuter.y;
+                            const faceTurnedDown = noseTip.y > leftEyeOuter.y;
 
-                        const faceTurnedRight = noseTip.x < leftEyeOuter.x;
-                        const faceTurnedLeft = noseTip.x > rightEyeOuter.x;
-                        const faceTurnedUp = noseTip.y < leftEyeOuter.y;
-                        const faceTurnedDown = noseTip.y > leftEyeOuter.y;
-
-                        const faceIsTurned = faceTurnedRight || faceTurnedLeft || faceTurnedUp || faceTurnedDown;
-                        if (faceIsTurned) {
-                            resetFaceOffScreenTimeout();
-                        } else {
-                            if (faceOffScreenTimeout.current) {
-                                clearTimeout(faceOffScreenTimeout.current);
-                                faceOffScreenTimeout.current = null;
+                            const faceIsTurned = faceTurnedRight || faceTurnedLeft || faceTurnedUp || faceTurnedDown;
+                            if (faceIsTurned) {
+                                resetFaceOffScreenTimeout();
+                            } else {
+                                if (faceOffScreenTimeout.current) {
+                                    clearTimeout(faceOffScreenTimeout.current);
+                                    faceOffScreenTimeout.current = null;
+                                }
                             }
-                        }
 
-                        // Check multiple faces
-                        if (results.multiFaceLandmarks.length > 1) {
-                            setMultipleFacesDetected(true);
-                            resetMultipleFacesTimeout();
-                        } else {
-                            if (multipleFacesTimeout.current) {
-                                clearTimeout(multipleFacesTimeout.current);
-                                multipleFacesTimeout.current = null;
+                            // Check if facing down while staring at the screen
+                            const facingDownStaringAtScreen = faceTurnedDown && (leftEyeOuter.y > landmarks[1].y || rightEyeOuter.y > landmarks[1].y);
+                            if (facingDownStaringAtScreen) {
+                                resetDownStareWarningTimeout();
+                            } else {
+                                if (downStareWarningTimeout.current) {
+                                    clearTimeout(downStareWarningTimeout.current);
+                                    downStareWarningTimeout.current = null;
+                                }
                             }
-                            setMultipleFacesDetected(false);
-                        }
 
-                        // Draw bounding box
-                        const boundingBox = landmarks.reduce(
-                            (box, landmark) => {
-                                return {
-                                    minX: Math.min(box.minX, landmark.x),
-                                    minY: Math.min(box.minY, landmark.y),
-                                    maxX: Math.max(box.maxX, landmark.x),
-                                    maxY: Math.max(box.maxY, landmark.y),
-                                };
-                            },
-                            { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
-                        );
+                            // Check multiple faces
+                            if (results.multiFaceLandmarks.length > 1) {
+                                console.log('Other person detected!', results.multiFaceLandmarks.length);
+                                setMultipleFacesDetected(true);
+                                resetMultipleFacesTimeout();
+                            } else {
+                                if (multipleFacesTimeout.current) {
+                                    clearTimeout(multipleFacesTimeout.current);
+                                    multipleFacesTimeout.current = null;
+                                }
+                                setMultipleFacesDetected(false);
+                            }
 
-                        context.strokeStyle = 'red';
-                        context.lineWidth = 2;
-                        context.strokeRect(
-                            boundingBox.minX * canvas.width,
-                            boundingBox.minY * canvas.height,
-                            (boundingBox.maxX - boundingBox.minX) * canvas.width,
-                            (boundingBox.maxY - boundingBox.minY) * canvas.height
-                        );
+                            // Draw bounding box
+                            const boundingBox = landmarks.reduce(
+                                (box, landmark) => {
+                                    return {
+                                        minX: Math.min(box.minX, landmark.x),
+                                        minY: Math.min(box.minY, landmark.y),
+                                        maxX: Math.max(box.maxX, landmark.x),
+                                        maxY: Math.max(box.maxY, landmark.y),
+                                    };
+                                },
+                                { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+                            );
 
-                        // Draw points for eyes and ears
-                        const drawLandmark = (index: number, color: string) => {
-                            const x = landmarks[index].x * canvas.width;
-                            const y = landmarks[index].y * canvas.height;
-                            context.fillStyle = color;
-                            context.beginPath();
-                            context.arc(x, y, 3, 0, 2 * Math.PI);
-                            context.fill();
-                        };
+                            context.strokeStyle = 'red';
+                            context.lineWidth = 2;
+                            context.strokeRect(
+                                boundingBox.minX * canvas.width,
+                                boundingBox.minY * canvas.height,
+                                (boundingBox.maxX - boundingBox.minX) * canvas.width,
+                                (boundingBox.maxY - boundingBox.minY) * canvas.height
+                            );
 
-                        // Left eye landmarks
-                        const leftEyeIndices = [33, 133, 145, 153, 160, 159, 158, 157, 173, 246];
-                        leftEyeIndices.forEach(index => drawLandmark(index, 'green'));
+                            // Draw points for eyes and ears
+                            const drawLandmark = (index: number, color: string) => {
+                                const x = landmarks[index].x * canvas.width;
+                                const y = landmarks[index].y * canvas.height;
+                                context.fillStyle = color;
+                                context.beginPath();
+                                context.arc(x, y, 3, 0, 2 * Math.PI);
+                                context.fill();
+                            };
 
-                        // Right eye landmarks
-                        const rightEyeIndices = [362, 263, 387, 373, 380, 374, 373, 390, 388, 466];
-                        rightEyeIndices.forEach(index => drawLandmark(index, 'green'));
+                            // Left eye landmarks
+                            const leftEyeIndices = [33, 133, 145, 153, 160, 159, 158, 157, 173, 246];
+                            leftEyeIndices.forEach(index => drawLandmark(index, 'green'));
 
-                        // Left ear landmark
-                        drawLandmark(234, 'orange');
+                            // Right eye landmarks
+                            const rightEyeIndices = [362, 263, 387, 373, 380, 374, 373, 390, 388, 466];
+                            rightEyeIndices.forEach(index => drawLandmark(index, 'green'));
 
-                        // Right ear landmark
-                        drawLandmark(454, 'orange');
+                            // Left ear landmark
+                            drawLandmark(234, 'orange');
+
+                            // Right ear landmark
+                            drawLandmark(454, 'orange');
+                        });
                     } else {
                         setFaceDetected(false);
                         if (!violationTimeout.current) {
@@ -214,7 +248,7 @@ const TSHome = () => {
             });
 
             faceMeshInstance.setOptions({
-                maxNumFaces: 1,
+                maxNumFaces: 10,
                 refineLandmarks: true,
                 minDetectionConfidence: 0.5,
                 minTrackingConfidence: 0.5,
@@ -222,10 +256,27 @@ const TSHome = () => {
 
             faceMeshInstance.onResults(onResults);
 
-            if (webcamRef.current?.video) {
+            const initializeCamera = async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    if (webcamRef.current && webcamRef.current.video) {
+                        webcamRef.current.video.srcObject = stream;
+                        console.log("Video stream set");
+                    } else {
+                        console.error("webcamRef.current is not set");
+                    }
+                } catch (error) {
+                    console.error("Error accessing media devices.", error);
+                    setCameraAccessDenied(true);
+                }
+            };
+
+            initializeCamera();
+
+            if (webcamRef.current && webcamRef.current.video) {
                 const camera = new camUtils.Camera(webcamRef.current.video, {
                     onFrame: async () => {
-                        if (webcamRef.current?.video) {
+                        if (webcamRef.current && webcamRef.current.video) {
                             await faceMeshInstance.send({ image: webcamRef.current.video });
                         }
                     },
@@ -248,6 +299,9 @@ const TSHome = () => {
             }
             if (multipleFacesTimeout.current) {
                 clearTimeout(multipleFacesTimeout.current);
+            }
+            if (downStareWarningTimeout.current) {
+                clearTimeout(downStareWarningTimeout.current);
             }
         };
     }, []);
@@ -343,17 +397,25 @@ const TSHome = () => {
 
                 {/* Right Column */}
                 <div className="md:w-1/2 h-fit justify-center items-center relative">
-                    <Webcam
-                        audio={false}
-                        ref={webcamRef}
-                        screenshotFormat="image/jpeg"
-                        className="w-full rounded shadow-md -scale-x-100"
-                    />
-                    <canvas ref={canvasRef} className={`absolute top-0 left-0 h-full w-full -scale-x-100 ${!faceDetected ? 'hidden' : ''}`} />
-                    {!faceDetected && (
-                        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center -scale-x-100 bg-gray-800 bg-opacity-50 text-white">
-                            <p className='-scale-x-100'>No face detected</p>
+                    {cameraAccessDenied ? (
+                        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-75 text-white">
+                            <p>Camera access denied. Please allow camera access to continue.</p>
                         </div>
+                    ) : (
+                        <>
+                            <Webcam
+                                audio={false}
+                                ref={webcamRef}
+                                screenshotFormat="image/jpeg"
+                                className="w-full rounded shadow-md -scale-x-100"
+                            />
+                            <canvas ref={canvasRef} className={`absolute top-0 left-0 h-full w-full -scale-x-100 ${!faceDetected ? 'hidden' : ''}`} />
+                            {!faceDetected && (
+                                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center -scale-x-100 bg-gray-800 bg-opacity-50 text-white">
+                                    <p className='-scale-x-100'>No face detected</p>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
