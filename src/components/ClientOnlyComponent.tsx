@@ -9,23 +9,17 @@ import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
 
 const TSHome = () => {
-
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [faceDetected, setFaceDetected] = useState<boolean>(false);
     const [violations, setViolations] = useState<number>(0);
     const [cheating, setCheating] = useState<boolean>(false);
     const [violationImages, setViolationImages] = useState<string[]>([]);
     const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
-    const [multipleFacesDetected, setMultipleFacesDetected] = useState<boolean>(false);
-    const [cameraAccessDenied, setCameraAccessDenied] = useState<boolean>(false);
-    const [downStareWarnings, setDownStareWarnings] = useState<number>(0);
-
+    const [showWarning, setShowWarning] = useState<boolean>(false);
     const webcamRef = useRef<Webcam>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const violationTimeout = useRef<NodeJS.Timeout | null>(null);
-    const faceOffScreenTimeout = useRef<NodeJS.Timeout | null>(null);
-    const multipleFacesTimeout = useRef<NodeJS.Timeout | null>(null);
-    const downStareWarningTimeout = useRef<NodeJS.Timeout | null>(null);
+    const multipleFaceTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const toggleAccordion = (index: number) => {
         setActiveIndex(activeIndex === index ? null : index);
@@ -33,9 +27,9 @@ const TSHome = () => {
 
     const handleCheating = () => {
         setCheating(true);
-        if (webcamRef.current && webcamRef.current.video) {
-            webcamRef.current.video.pause();
-            (webcamRef.current.video.srcObject as MediaStream)?.getTracks().forEach(track => track.stop());
+        if (webcamRef.current) {
+            webcamRef.current.video?.pause();
+            (webcamRef.current.video?.srcObject as MediaStream)?.getTracks().forEach(track => track.stop());
         }
     };
 
@@ -52,47 +46,11 @@ const TSHome = () => {
         });
     };
 
-    const incrementDownStareWarnings = () => {
-        setDownStareWarnings(prev => {
-            const newWarnings = prev + 1;
-            if (newWarnings >= 3) {
-                incrementViolations();
-                setDownStareWarnings(0); // reset warnings after converting to a violation
-            }
-            return newWarnings;
-        });
-    };
-
     const resetViolationTimeout = () => {
         if (violationTimeout.current) {
             clearTimeout(violationTimeout.current);
         }
-        violationTimeout.current = setTimeout(incrementViolations, 5000);
-    };
-
-    const resetFaceOffScreenTimeout = () => {
-        if (faceOffScreenTimeout.current) {
-            clearTimeout(faceOffScreenTimeout.current);
-        }
-        faceOffScreenTimeout.current = setTimeout(incrementViolations, 4000);
-    };
-
-    const resetMultipleFacesTimeout = () => {
-        if (multipleFacesTimeout.current) {
-            clearTimeout(multipleFacesTimeout.current);
-        }
-        multipleFacesTimeout.current = setTimeout(() => {
-            incrementViolations();
-        }, 3000);
-    };
-
-    const resetDownStareWarningTimeout = () => {
-        if (downStareWarningTimeout.current) {
-            clearTimeout(downStareWarningTimeout.current);
-        }
-        downStareWarningTimeout.current = setTimeout(() => {
-            incrementDownStareWarnings();
-        }, 8000);
+        violationTimeout.current = setTimeout(incrementViolations, 4000);
     };
 
     const captureImage = () => {
@@ -142,52 +100,23 @@ const TSHome = () => {
                     context?.clearRect(0, 0, canvas.width, canvas.height);
 
                     if (context && results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-                        setFaceDetected(true);
-                        resetViolationTimeout();
-                        results.multiFaceLandmarks.forEach(landmarks => {
-                            // Check face orientation
-                            const noseTip = landmarks[1];
-                            const leftEyeOuter = landmarks[33];
-                            const rightEyeOuter = landmarks[263];
-
-                            const faceTurnedRight = noseTip.x < leftEyeOuter.x;
-                            const faceTurnedLeft = noseTip.x > rightEyeOuter.x;
-                            const faceTurnedUp = noseTip.y < leftEyeOuter.y;
-                            const faceTurnedDown = noseTip.y > leftEyeOuter.y;
-
-                            const faceIsTurned = faceTurnedRight || faceTurnedLeft || faceTurnedUp || faceTurnedDown;
-                            if (faceIsTurned) {
-                                resetFaceOffScreenTimeout();
-                            } else {
-                                if (faceOffScreenTimeout.current) {
-                                    clearTimeout(faceOffScreenTimeout.current);
-                                    faceOffScreenTimeout.current = null;
-                                }
+                        if (results.multiFaceLandmarks.length > 1) {
+                            setShowWarning(true);
+                            incrementViolations();
+                            if (!multipleFaceTimeout.current) {
+                                multipleFaceTimeout.current = setTimeout(() => {
+                                    setShowWarning(false);
+                                    handleCheating();
+                                }, 4000);
                             }
-
-                            // Check if facing down while staring at the screen
-                            const facingDownStaringAtScreen = faceTurnedDown && (leftEyeOuter.y > landmarks[1].y || rightEyeOuter.y > landmarks[1].y);
-                            if (facingDownStaringAtScreen) {
-                                resetDownStareWarningTimeout();
-                            } else {
-                                if (downStareWarningTimeout.current) {
-                                    clearTimeout(downStareWarningTimeout.current);
-                                    downStareWarningTimeout.current = null;
-                                }
+                        } else {
+                            if (multipleFaceTimeout.current) {
+                                clearTimeout(multipleFaceTimeout.current);
+                                multipleFaceTimeout.current = null;
                             }
-
-                            // Check multiple faces
-                            if (results.multiFaceLandmarks.length > 1) {
-                                console.log('Other person detected!', results.multiFaceLandmarks.length);
-                                setMultipleFacesDetected(true);
-                                resetMultipleFacesTimeout();
-                            } else {
-                                if (multipleFacesTimeout.current) {
-                                    clearTimeout(multipleFacesTimeout.current);
-                                    multipleFacesTimeout.current = null;
-                                }
-                                setMultipleFacesDetected(false);
-                            }
+                            setFaceDetected(true);
+                            resetViolationTimeout();
+                            const landmarks = results.multiFaceLandmarks[0];
 
                             // Draw bounding box
                             const boundingBox = landmarks.reduce(
@@ -234,11 +163,11 @@ const TSHome = () => {
 
                             // Right ear landmark
                             drawLandmark(454, 'orange');
-                        });
+                        }
                     } else {
                         setFaceDetected(false);
                         if (!violationTimeout.current) {
-                            violationTimeout.current = setTimeout(incrementViolations, 5000);
+                            violationTimeout.current = setTimeout(incrementViolations, 4000);
                         }
                     }
                 }
@@ -249,7 +178,7 @@ const TSHome = () => {
             });
 
             faceMeshInstance.setOptions({
-                maxNumFaces: 10,
+                maxNumFaces: 2,
                 refineLandmarks: true,
                 minDetectionConfidence: 0.5,
                 minTrackingConfidence: 0.5,
@@ -257,27 +186,10 @@ const TSHome = () => {
 
             faceMeshInstance.onResults(onResults);
 
-            const initializeCamera = async () => {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    if (webcamRef.current && webcamRef.current.video) {
-                        webcamRef.current.video.srcObject = stream;
-                        console.log("Video stream set");
-                    } else {
-                        console.error("webcamRef.current is not set");
-                    }
-                } catch (error) {
-                    console.error("Error accessing media devices.", error);
-                    setCameraAccessDenied(true);
-                }
-            };
-
-            initializeCamera();
-
-            if (webcamRef.current && webcamRef.current.video) {
+            if (webcamRef.current?.video) {
                 const camera = new camUtils.Camera(webcamRef.current.video, {
                     onFrame: async () => {
-                        if (webcamRef.current && webcamRef.current.video) {
+                        if (webcamRef.current?.video) {
                             await faceMeshInstance.send({ image: webcamRef.current.video });
                         }
                     },
@@ -295,14 +207,8 @@ const TSHome = () => {
             if (violationTimeout.current) {
                 clearTimeout(violationTimeout.current);
             }
-            if (faceOffScreenTimeout.current) {
-                clearTimeout(faceOffScreenTimeout.current);
-            }
-            if (multipleFacesTimeout.current) {
-                clearTimeout(multipleFacesTimeout.current);
-            }
-            if (downStareWarningTimeout.current) {
-                clearTimeout(downStareWarningTimeout.current);
+            if (multipleFaceTimeout.current) {
+                clearTimeout(multipleFaceTimeout.current);
             }
         };
     }, []);
@@ -311,7 +217,9 @@ const TSHome = () => {
         <div>
             <nav className="bg-gray-800 p-4">
                 <div className="container mx-auto flex justify-between items-center">
-                    <Link href={'/'}><div className="text-white text-lg font-bold">CBT</div></Link>
+                    <Link href={'/'}>
+                        <div className="text-white text-lg font-bold">CBT</div>
+                    </Link>
                     <div className="hidden md:flex space-x-4">
                         <a href="/" className="text-white">Home</a>
                         <a href="/" className="text-white">About</a>
@@ -398,25 +306,17 @@ const TSHome = () => {
 
                 {/* Right Column */}
                 <div className="md:w-1/2 h-fit justify-center items-center relative">
-                    {cameraAccessDenied ? (
-                        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-75 text-white">
-                            <p>Camera access denied. Please allow camera access to continue.</p>
+                    <Webcam
+                        audio={false}
+                        ref={webcamRef}
+                        screenshotFormat="image/jpeg"
+                        className="w-full rounded shadow-md -scale-x-100"
+                    />
+                    <canvas ref={canvasRef} className={`absolute top-0 left-0 h-full w-full -scale-x-100 ${!faceDetected ? 'hidden' : ''}`} />
+                    {!faceDetected && (
+                        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center -scale-x-100 bg-gray-800 bg-opacity-50 text-white">
+                            <p className='-scale-x-100'>No face detected</p>
                         </div>
-                    ) : (
-                        <>
-                            <Webcam
-                                audio={false}
-                                ref={webcamRef}
-                                screenshotFormat="image/jpeg"
-                                className="w-full rounded shadow-md -scale-x-100"
-                            />
-                            <canvas ref={canvasRef} className={`absolute top-0 left-0 h-full w-full -scale-x-100 ${!faceDetected ? 'hidden' : ''}`} />
-                            {!faceDetected && (
-                                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center -scale-x-100 bg-gray-800 bg-opacity-50 text-white">
-                                    <p className='-scale-x-100'>No face detected</p>
-                                </div>
-                            )}
-                        </>
                     )}
                 </div>
             </div>
@@ -465,16 +365,15 @@ const TSHome = () => {
                 </div>
             )}
 
-            {/* Multiple Faces Warning */}
-            {multipleFacesDetected && (
+            {/* Warning Modal */}
+            {showWarning && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
                     <div className="bg-white p-8 rounded shadow-md text-center">
-                        <h2 className="text-2xl font-bold text-red-500 mb-4">Multiple Face Detected</h2>
-                        <p className="text-lg">Please ensure only one person is in view.</p>
+                        <h2 className="text-2xl font-bold text-yellow-500 mb-4">Multiple Faces Detected</h2>
+                        <p className="text-lg">Please ensure only one person is in the frame.</p>
                     </div>
                 </div>
             )}
-
         </div>
     );
 };
