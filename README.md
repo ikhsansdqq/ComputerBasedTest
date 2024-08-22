@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Main Libraries
+
+```https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector```
+
 ## Getting Started
 
 First, run the development server:
