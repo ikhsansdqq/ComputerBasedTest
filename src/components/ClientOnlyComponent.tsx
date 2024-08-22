@@ -9,7 +9,6 @@ import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
 
 const TSHome = () => {
-
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [faceDetected, setFaceDetected] = useState<boolean>(false);
     const [violations, setViolations] = useState<number>(0);
@@ -25,7 +24,7 @@ const TSHome = () => {
     const violationTimeout = useRef<NodeJS.Timeout | null>(null);
     const faceOffScreenTimeout = useRef<NodeJS.Timeout | null>(null);
     const multipleFacesTimeout = useRef<NodeJS.Timeout | null>(null);
-    const downStareWarningTimeout = useRef<NodeJS.Timeout | null>(null);
+    const downStareTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const toggleAccordion = (index: number) => {
         setActiveIndex(activeIndex === index ? null : index);
@@ -70,11 +69,11 @@ const TSHome = () => {
         violationTimeout.current = setTimeout(incrementViolations, 5000);
     };
 
-    const resetFaceOffScreenTimeout = () => {
-        if (faceOffScreenTimeout.current) {
-            clearTimeout(faceOffScreenTimeout.current);
+    const resetDownStareTimeout = () => {
+        if (downStareTimeout.current) {
+            clearTimeout(downStareTimeout.current);
         }
-        faceOffScreenTimeout.current = setTimeout(incrementViolations, 4000);
+        downStareTimeout.current = setTimeout(incrementViolations, 3000); // 3 seconds violation threshold for downstate
     };
 
     const resetMultipleFacesTimeout = () => {
@@ -83,16 +82,7 @@ const TSHome = () => {
         }
         multipleFacesTimeout.current = setTimeout(() => {
             incrementViolations();
-        }, 3000);
-    };
-
-    const resetDownStareWarningTimeout = () => {
-        if (downStareWarningTimeout.current) {
-            clearTimeout(downStareWarningTimeout.current);
-        }
-        downStareWarningTimeout.current = setTimeout(() => {
-            incrementDownStareWarnings();
-        }, 8000);
+        }, 3000); // 3 seconds violation threshold for multiple faces
     };
 
     const captureImage = () => {
@@ -144,43 +134,35 @@ const TSHome = () => {
                     if (context && results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                         setFaceDetected(true);
                         resetViolationTimeout();
+
                         results.multiFaceLandmarks.forEach(landmarks => {
                             // Check face orientation
                             const noseTip = landmarks[1];
                             const leftEyeOuter = landmarks[33];
                             const rightEyeOuter = landmarks[263];
 
-                            const faceTurnedRight = noseTip.x < leftEyeOuter.x;
-                            const faceTurnedLeft = noseTip.x > rightEyeOuter.x;
-                            const faceTurnedUp = noseTip.y < leftEyeOuter.y;
-                            const faceTurnedDown = noseTip.y > leftEyeOuter.y;
+                            const faceTurnedDown = noseTip.y > leftEyeOuter.y && noseTip.y > rightEyeOuter.y;
 
-                            const faceIsTurned = faceTurnedRight || faceTurnedLeft || faceTurnedUp || faceTurnedDown;
-                            if (faceIsTurned) {
-                                resetFaceOffScreenTimeout();
+                            if (faceTurnedDown) {
+                                resetDownStareTimeout();
                             } else {
-                                if (faceOffScreenTimeout.current) {
-                                    clearTimeout(faceOffScreenTimeout.current);
-                                    faceOffScreenTimeout.current = null;
+                                if (downStareTimeout.current) {
+                                    clearTimeout(downStareTimeout.current);
+                                    downStareTimeout.current = null;
                                 }
                             }
 
-                            // Check if facing down while staring at the screen
-                            const facingDownStaringAtScreen = faceTurnedDown && (leftEyeOuter.y > landmarks[1].y || rightEyeOuter.y > landmarks[1].y);
-                            if (facingDownStaringAtScreen) {
-                                resetDownStareWarningTimeout();
-                            } else {
-                                if (downStareWarningTimeout.current) {
-                                    clearTimeout(downStareWarningTimeout.current);
-                                    downStareWarningTimeout.current = null;
-                                }
-                            }
-
-                            // Check multiple faces
+                            // Check for multiple faces
                             if (results.multiFaceLandmarks.length > 1) {
                                 console.log('Other person detected!', results.multiFaceLandmarks.length);
                                 setMultipleFacesDetected(true);
-                                resetMultipleFacesTimeout();
+
+                                if (!multipleFacesTimeout.current) {
+                                    multipleFacesTimeout.current = setTimeout(() => {
+                                        incrementViolations();
+                                        multipleFacesTimeout.current = null;  // Reset the timeout after violation increment
+                                    }, 3000); // 3 seconds Threshold for multiple faces
+                                }
                             } else {
                                 if (multipleFacesTimeout.current) {
                                     clearTimeout(multipleFacesTimeout.current);
@@ -189,7 +171,7 @@ const TSHome = () => {
                                 setMultipleFacesDetected(false);
                             }
 
-                            // Draw bounding box
+                            // Draw the bounding box
                             const boundingBox = landmarks.reduce(
                                 (box, landmark) => {
                                     return {
@@ -211,7 +193,7 @@ const TSHome = () => {
                                 (boundingBox.maxY - boundingBox.minY) * canvas.height
                             );
 
-                            // Draw points for eyes and ears
+                            // Draw points for Eyes and Ears
                             const drawLandmark = (index: number, color: string) => {
                                 const x = landmarks[index].x * canvas.width;
                                 const y = landmarks[index].y * canvas.height;
@@ -221,24 +203,21 @@ const TSHome = () => {
                                 context.fill();
                             };
 
-                            // Left eye landmarks
+                            // Left eye Landmarks markers
                             const leftEyeIndices = [33, 133, 145, 153, 160, 159, 158, 157, 173, 246];
                             leftEyeIndices.forEach(index => drawLandmark(index, 'green'));
 
-                            // Right eye landmarks
+                            // Right eye Landmarks markers
                             const rightEyeIndices = [362, 263, 387, 373, 380, 374, 373, 390, 388, 466];
                             rightEyeIndices.forEach(index => drawLandmark(index, 'green'));
 
-                            // Left ear landmark
-                            drawLandmark(234, 'orange');
-
-                            // Right ear landmark
-                            drawLandmark(454, 'orange');
+                            drawLandmark(234, 'orange'); // Left ear
+                            drawLandmark(454, 'orange'); // Right Ear
                         });
                     } else {
                         setFaceDetected(false);
                         if (!violationTimeout.current) {
-                            violationTimeout.current = setTimeout(incrementViolations, 5000);
+                            violationTimeout.current = setTimeout(incrementViolations, 5000); // 5 seconds violation threshold for face off-screen
                         }
                     }
                 }
@@ -249,7 +228,7 @@ const TSHome = () => {
             });
 
             faceMeshInstance.setOptions({
-                maxNumFaces: 10,
+                maxNumFaces: 2, // Allow up to 2 faces for detection
                 refineLandmarks: true,
                 minDetectionConfidence: 0.5,
                 minTrackingConfidence: 0.5,
@@ -301,8 +280,8 @@ const TSHome = () => {
             if (multipleFacesTimeout.current) {
                 clearTimeout(multipleFacesTimeout.current);
             }
-            if (downStareWarningTimeout.current) {
-                clearTimeout(downStareWarningTimeout.current);
+            if (downStareTimeout.current) {
+                clearTimeout(downStareTimeout.current);
             }
         };
     }, []);
@@ -311,11 +290,11 @@ const TSHome = () => {
         <div>
             <nav className="bg-gray-800 p-4">
                 <div className="container mx-auto flex justify-between items-center">
-                    <Link href={'/'}><div className="text-white text-lg font-bold">CBT</div></Link>
+                    <Link href={'#'}><div className="text-white text-lg font-bold">CBT</div></Link>
                     <div className="hidden md:flex space-x-4">
-                        <a href="/" className="text-white">Home</a>
-                        <a href="/" className="text-white">About</a>
-                        <a href="/" className="text-white">Contact</a>
+                        <a href="#" className="text-white">Home</a>
+                        <a href="#" className="text-white">About</a>
+                        <a href="#" className="text-white">Contact</a>
                     </div>
                 </div>
             </nav>
