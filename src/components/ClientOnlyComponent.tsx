@@ -17,7 +17,7 @@ const TSHome = () => {
     const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
     const [multipleFacesDetected, setMultipleFacesDetected] = useState<boolean>(false);
     const [cameraAccessDenied, setCameraAccessDenied] = useState<boolean>(false);
-    const [downStareWarnings, setDownStareWarnings] = useState<number>(0);
+    // const [downStareWarnings, setDownStareWarnings] = useState<number>(0);
 
     const webcamRef = useRef<Webcam>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -51,16 +51,16 @@ const TSHome = () => {
         });
     };
 
-    const incrementDownStareWarnings = () => {
-        setDownStareWarnings(prev => {
-            const newWarnings = prev + 1;
-            if (newWarnings >= 3) {
-                incrementViolations();
-                setDownStareWarnings(0); // reset warnings after converting to a violation
-            }
-            return newWarnings;
-        });
-    };
+    // const incrementDownStareWarnings = () => {
+    //     setDownStareWarnings(prev => {
+    //         const newWarnings = prev + 1;
+    //         if (newWarnings >= 3) {
+    //             incrementViolations();
+    //             setDownStareWarnings(0); // reset warnings after converting to a violation
+    //         }
+    //         return newWarnings;
+    //     });
+    // };
 
     const resetViolationTimeout = () => {
         if (violationTimeout.current) {
@@ -76,14 +76,14 @@ const TSHome = () => {
         downStareTimeout.current = setTimeout(incrementViolations, 3000); // 3 seconds violation threshold for downstate
     };
 
-    const resetMultipleFacesTimeout = () => {
-        if (multipleFacesTimeout.current) {
-            clearTimeout(multipleFacesTimeout.current);
-        }
-        multipleFacesTimeout.current = setTimeout(() => {
-            incrementViolations();
-        }, 3000); // 3 seconds violation threshold for multiple faces
-    };
+    // const resetMultipleFacesTimeout = () => {
+    //     if (multipleFacesTimeout.current) {
+    //         clearTimeout(multipleFacesTimeout.current);
+    //     }
+    //     multipleFacesTimeout.current = setTimeout(() => {
+    //         incrementViolations();
+    //     }, 3000); // 3 seconds violation threshold for multiple faces
+    // };
 
     const captureImage = () => {
         if (webcamRef.current) {
