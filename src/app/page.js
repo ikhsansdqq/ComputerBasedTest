@@ -3,11 +3,12 @@ import Image from 'next/image';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 sm:px-6 lg:px-8 px-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 py-12 sm:px-6 lg:px-8 px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
+          <Image width={256} height={56} src="/artristik-logo.png" alt="Artristik Logo" className="mx-auto bg-black" />
           <h1 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome to Computer Based Test (CBT) System
+            Welcome to MVP of Computer Based Test (CBT) System
           </h1>
           <p className="mt-8 text-center text-base text-gray-600">
             This examination will be conducted online. Please make sure you have a good internet connection and a compatible device. You can check your hardware compatibility below.
@@ -42,11 +43,6 @@ export default function HomePage() {
             </div>
           </Link>
           <button className='mt-12 w-full px-4 py-3 rounded text-white bg-red-700 hover:shadow-md hover:bg-red-800 transition duration-300'>Report any issue</button>
-        </div>
-        <div className="flex justify-center mt-6">
-          <button className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-            Let&apos;s start
-          </button>
         </div>
       </div>
     </div>

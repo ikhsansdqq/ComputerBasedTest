@@ -3,12 +3,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
 
 const TSHome = () => {
+    const router = useRouter();
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [faceDetected, setFaceDetected] = useState<boolean>(false);
     const [violations, setViolations] = useState<number>(() => {
@@ -19,6 +21,7 @@ const TSHome = () => {
         return JSON.parse(sessionStorage.getItem('violationImages') || '[]');
     });
     const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
+
     const [multipleFacesDetected, setMultipleFacesDetected] = useState<boolean>(false);
     const [cameraAccessDenied, setCameraAccessDenied] = useState<boolean>(false);
 
@@ -84,12 +87,22 @@ const TSHome = () => {
     }, [violationImages]);
 
     const endSession = () => {
-        sessionStorage.removeItem('violations');
-        sessionStorage.removeItem('violationImages');
-        setViolations(0);
-        setViolationImages([]);
+        // Store violations data in session storage for use on the results page
+        sessionStorage.setItem('violations', violations.toString());
+        sessionStorage.setItem('violationImages', JSON.stringify(violationImages));
+
+        // Stop the camera stream if it’s active
+        if (webcamRef.current && webcamRef.current.video && webcamRef.current.video.srcObject) {
+            (webcamRef.current.video.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+        }
+
+        // Close the confirmation dialog and redirect to the results page
         setShowEndSessionConfirm(false);
+
+        // Redirect to the results page and reset state after redirect
+        router.push('/result');
     };
+
 
     const onEndSessionClick = () => {
         setShowEndSessionConfirm(true);
@@ -291,7 +304,7 @@ const TSHome = () => {
                             {/* End Session Button */}
                             <div className="">
                                 <button
-                                    onClick={onEndSessionClick}
+                                    onClick={endSession}
                                     className="bg-blue-500 text-white p-4 rounded-full"
                                 >
                                     End Session
