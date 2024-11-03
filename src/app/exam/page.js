@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 
 const ClientOnlyComponent = dynamic(() => import("@/components/ClientOnlyComponent"), {
-  ssr: false,
+  ssr: true,
 });
 
 const ScriptPage = () => {

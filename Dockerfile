@@ -7,11 +7,11 @@ WORKDIR /app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install the application dependencies
-RUN npm install
-
 # Copy the rest of the application files to the working directory
 COPY . .
+
+# Install the application dependencies
+RUN npm install
 
 # Expose the port that your application will run on
 EXPOSE 8080
