@@ -1,48 +1,36 @@
 # Stage 1: Build the application
-FROM node:21-alpine AS builder
+FROM node:21-slim AS builder
 
-# Set environment to production for this stage
-ENV NODE_ENV=production
-
-# Set working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json and install dependencies
+# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install production dependencies first to leverage Docker layer caching
-RUN npm ci --omit=dev
+# Install only production dependencies initially (this step is cached)
+RUN npm install --only=production
 
-# Copy the rest of the application files
+# Install all dependencies, including devDependencies for building
 COPY . .
-
-# Install devDependencies for building
 RUN npm install
 
-# Build the Next.js application
+# Build the Next.js application for production
 RUN npm run build
 
-# Remove devDependencies and clean npm cache to reduce image size
-RUN npm prune --omit=dev && npm cache clean --force
+# Stage 2: Run the application
+FROM node:21-slim
 
-# Stage 2: Create the final runtime image
-FROM node:21-alpine
-
-# Set environment to production for the final stage
+# Set NODE_ENV to production
 ENV NODE_ENV=production
 
-# Set working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy necessary files from the builder stage
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+# Copy the built application and dependencies from the builder stage
+COPY --from=builder /app /app
 
-# Expose port and set max memory usage
+# Expose the port that your application will run on
 EXPOSE 8080
-ENV NODE_OPTIONS="--max-old-space-size=256"
 
-# Run the application
+# Command to run the application
 CMD ["npm", "run", "start"]
