@@ -1,14 +1,14 @@
 # Use the official Node.js LTS image from the Docker Hub
-FROM node:lts
+FROM node:21-slim
 
 # Set the working directory inside the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
 # Install the application dependencies
-RUN yarn install
+RUN npm install
 
 # Copy the rest of the application files to the working directory
 COPY . .
