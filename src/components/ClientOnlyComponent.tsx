@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import * as faceMesh from '@mediapipe/face_mesh';
 import * as camUtils from '@mediapipe/camera_utils';
@@ -11,18 +11,20 @@ import * as camUtils from '@mediapipe/camera_utils';
 const TSHome = () => {
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [faceDetected, setFaceDetected] = useState<boolean>(false);
-    const [violations, setViolations] = useState<number>(0);
+    const [violations, setViolations] = useState<number>(() => {
+        return parseInt(sessionStorage.getItem('violations') || '0', 10);
+    });
     const [cheating, setCheating] = useState<boolean>(false);
-    const [violationImages, setViolationImages] = useState<string[]>([]);
+    const [violationImages, setViolationImages] = useState<string[]>(() => {
+        return JSON.parse(sessionStorage.getItem('violationImages') || '[]');
+    });
     const [showEndSessionConfirm, setShowEndSessionConfirm] = useState<boolean>(false);
     const [multipleFacesDetected, setMultipleFacesDetected] = useState<boolean>(false);
     const [cameraAccessDenied, setCameraAccessDenied] = useState<boolean>(false);
-    // const [downStareWarnings, setDownStareWarnings] = useState<number>(0);
 
     const webcamRef = useRef<Webcam>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const violationTimeout = useRef<NodeJS.Timeout | null>(null);
-    const faceOffScreenTimeout = useRef<NodeJS.Timeout | null>(null);
     const multipleFacesTimeout = useRef<NodeJS.Timeout | null>(null);
     const downStareTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -30,18 +32,17 @@ const TSHome = () => {
         setActiveIndex(activeIndex === index ? null : index);
     };
 
-    const handleCheating = () => {
+    const handleCheating = useCallback(() => {
         setCheating(true);
         if (webcamRef.current && webcamRef.current.video) {
             webcamRef.current.video.pause();
             (webcamRef.current.video.srcObject as MediaStream)?.getTracks().forEach(track => track.stop());
         }
-    };
+    }, []);
 
-    const incrementViolations = () => {
+    const incrementViolations = useCallback(() => {
         setViolations(prev => {
             const newViolations = prev + 1;
-            sessionStorage.setItem('violations', newViolations.toString());
             if (newViolations >= 10) {
                 handleCheating();
             } else {
@@ -49,41 +50,22 @@ const TSHome = () => {
             }
             return newViolations;
         });
-    };
+    }, [handleCheating]);
 
-    // const incrementDownStareWarnings = () => {
-    //     setDownStareWarnings(prev => {
-    //         const newWarnings = prev + 1;
-    //         if (newWarnings >= 3) {
-    //             incrementViolations();
-    //             setDownStareWarnings(0); // reset warnings after converting to a violation
-    //         }
-    //         return newWarnings;
-    //     });
-    // };
+    useEffect(() => {
+        sessionStorage.setItem('violations', violations.toString());
+    }, [violations]);
 
-    const resetViolationTimeout = () => {
-        if (violationTimeout.current) {
-            clearTimeout(violationTimeout.current);
+    const resetTimeout = (
+        timeoutRef: React.MutableRefObject<NodeJS.Timeout | null>,
+        callback: () => void,
+        delay: number
+    ) => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
         }
-        violationTimeout.current = setTimeout(incrementViolations, 5000);
+        timeoutRef.current = setTimeout(callback, delay);
     };
-
-    const resetDownStareTimeout = () => {
-        if (downStareTimeout.current) {
-            clearTimeout(downStareTimeout.current);
-        }
-        downStareTimeout.current = setTimeout(incrementViolations, 3000); // 3 seconds violation threshold for downstate
-    };
-
-    // const resetMultipleFacesTimeout = () => {
-    //     if (multipleFacesTimeout.current) {
-    //         clearTimeout(multipleFacesTimeout.current);
-    //     }
-    //     multipleFacesTimeout.current = setTimeout(() => {
-    //         incrementViolations();
-    //     }, 3000); // 3 seconds violation threshold for multiple faces
-    // };
 
     const captureImage = () => {
         if (webcamRef.current) {
@@ -91,12 +73,15 @@ const TSHome = () => {
             if (imageSrc) {
                 setViolationImages(prev => {
                     const newImages = [...prev, imageSrc];
-                    sessionStorage.setItem('violationImages', JSON.stringify(newImages));
                     return newImages;
                 });
             }
         }
     };
+
+    useEffect(() => {
+        sessionStorage.setItem('violationImages', JSON.stringify(violationImages));
+    }, [violationImages]);
 
     const endSession = () => {
         sessionStorage.removeItem('violations');
@@ -115,176 +100,165 @@ const TSHome = () => {
     };
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const savedViolations = parseInt(sessionStorage.getItem('violations') || '0', 10);
-            const savedViolationImages = JSON.parse(sessionStorage.getItem('violationImages') || '[]');
-            setViolations(savedViolations);
-            setViolationImages(savedViolationImages);
+        const faceMeshInstance = new faceMesh.FaceMesh({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+        });
 
-            console.log('navigator saved violations:', savedViolations);
-        }
+        faceMeshInstance.setOptions({
+            maxNumFaces: 2,
+            refineLandmarks: true,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7,
+        });
 
-        if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
-            const onResults = (results: faceMesh.Results) => {
-                if (canvasRef.current) {
-                    const canvas = canvasRef.current;
-                    const context = canvas.getContext('2d');
-                    context?.clearRect(0, 0, canvas.width, canvas.height);
+        const onResults = (results: faceMesh.Results) => {
+            if (!canvasRef.current || !webcamRef.current || !webcamRef.current.video) return;
 
-                    if (context && results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-                        setFaceDetected(true);
-                        resetViolationTimeout();
+            const canvas = canvasRef.current;
+            const context = canvas.getContext('2d');
+            context?.clearRect(0, 0, canvas.width, canvas.height);
 
-                        results.multiFaceLandmarks.forEach(landmarks => {
-                            // Check face orientation
-                            const noseTip = landmarks[1];
-                            const leftEyeOuter = landmarks[33];
-                            const rightEyeOuter = landmarks[263];
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                setFaceDetected(true);
+                resetTimeout(violationTimeout, incrementViolations, 5000);
 
-                            const faceTurnedDown = noseTip.y > leftEyeOuter.y && noseTip.y > rightEyeOuter.y;
+                results.multiFaceLandmarks.forEach(landmarks => {
+                    // Check face orientation
+                    const noseTip = landmarks[1];
+                    const leftEyeOuter = landmarks[33];
+                    const rightEyeOuter = landmarks[263];
 
-                            if (faceTurnedDown) {
-                                resetDownStareTimeout();
-                            } else {
-                                if (downStareTimeout.current) {
-                                    clearTimeout(downStareTimeout.current);
-                                    downStareTimeout.current = null;
-                                }
-                            }
+                    const faceTurnedDown = noseTip.y > leftEyeOuter.y && noseTip.y > rightEyeOuter.y;
 
-                            // Check for multiple faces
-                            if (results.multiFaceLandmarks.length > 1) {
-                                console.log('Other person detected!', results.multiFaceLandmarks.length);
-                                setMultipleFacesDetected(true);
-
-                                if (!multipleFacesTimeout.current) {
-                                    multipleFacesTimeout.current = setTimeout(() => {
-                                        incrementViolations();
-                                        multipleFacesTimeout.current = null;  // Reset the timeout after violation increment
-                                    }, 3000); // 3 seconds Threshold for multiple faces
-                                }
-                            } else {
-                                if (multipleFacesTimeout.current) {
-                                    clearTimeout(multipleFacesTimeout.current);
-                                    multipleFacesTimeout.current = null;
-                                }
-                                setMultipleFacesDetected(false);
-                            }
-
-                            // Draw the bounding box
-                            const boundingBox = landmarks.reduce(
-                                (box, landmark) => {
-                                    return {
-                                        minX: Math.min(box.minX, landmark.x),
-                                        minY: Math.min(box.minY, landmark.y),
-                                        maxX: Math.max(box.maxX, landmark.x),
-                                        maxY: Math.max(box.maxY, landmark.y),
-                                    };
-                                },
-                                { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
-                            );
-
-                            context.strokeStyle = 'red';
-                            context.lineWidth = 2;
-                            context.strokeRect(
-                                boundingBox.minX * canvas.width,
-                                boundingBox.minY * canvas.height,
-                                (boundingBox.maxX - boundingBox.minX) * canvas.width,
-                                (boundingBox.maxY - boundingBox.minY) * canvas.height
-                            );
-
-                            // Draw points for Eyes and Ears
-                            const drawLandmark = (index: number, color: string) => {
-                                const x = landmarks[index].x * canvas.width;
-                                const y = landmarks[index].y * canvas.height;
-                                context.fillStyle = color;
-                                context.beginPath();
-                                context.arc(x, y, 3, 0, 2 * Math.PI);
-                                context.fill();
-                            };
-
-                            // Left eye Landmarks markers
-                            const leftEyeIndices = [33, 133, 145, 153, 160, 159, 158, 157, 173, 246];
-                            leftEyeIndices.forEach(index => drawLandmark(index, 'green'));
-
-                            // Right eye Landmarks markers
-                            const rightEyeIndices = [362, 263, 387, 373, 380, 374, 373, 390, 388, 466];
-                            rightEyeIndices.forEach(index => drawLandmark(index, 'green'));
-
-                            drawLandmark(234, 'orange'); // Left ear
-                            drawLandmark(454, 'orange'); // Right Ear
-                        });
+                    if (faceTurnedDown) {
+                        resetTimeout(downStareTimeout, incrementViolations, 3000);
                     } else {
-                        setFaceDetected(false);
-                        if (!violationTimeout.current) {
-                            violationTimeout.current = setTimeout(incrementViolations, 5000); // 5 seconds violation threshold for face off-screen
+                        if (downStareTimeout.current) {
+                            clearTimeout(downStareTimeout.current);
+                            downStareTimeout.current = null;
                         }
                     }
-                }
-            };
 
-            const faceMeshInstance = new faceMesh.FaceMesh({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
-            });
+                    // Check for multiple faces
+                    if (results.multiFaceLandmarks.length > 1) {
+                        console.log('Other person detected!', results.multiFaceLandmarks.length);
+                        setMultipleFacesDetected(true);
 
-            faceMeshInstance.setOptions({
-                maxNumFaces: 2, // Allow up to 2 faces for detection
-                refineLandmarks: true,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5,
-            });
-
-            faceMeshInstance.onResults(onResults);
-
-            const initializeCamera = async () => {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    if (webcamRef.current && webcamRef.current.video) {
-                        webcamRef.current.video.srcObject = stream;
-                        console.log("Video stream set");
-                    } else {
-                        console.error("webcamRef.current is not set");
-                    }
-                } catch (error) {
-                    console.error("Error accessing media devices.", error);
-                    setCameraAccessDenied(true);
-                }
-            };
-
-            initializeCamera();
-
-            if (webcamRef.current && webcamRef.current.video) {
-                const camera = new camUtils.Camera(webcamRef.current.video, {
-                    onFrame: async () => {
-                        if (webcamRef.current && webcamRef.current.video) {
-                            await faceMeshInstance.send({ image: webcamRef.current.video });
+                        if (!multipleFacesTimeout.current) {
+                            multipleFacesTimeout.current = setTimeout(() => {
+                                incrementViolations();
+                                multipleFacesTimeout.current = null;
+                            }, 3000);
                         }
-                    },
-                    width: 1280,
-                    height: 720,
-                    facingMode: "user",
+                    } else {
+                        if (multipleFacesTimeout.current) {
+                            clearTimeout(multipleFacesTimeout.current);
+                            multipleFacesTimeout.current = null;
+                        }
+                        setMultipleFacesDetected(false);
+                    }
+
+                    // Draw the bounding box
+                    if (context) {
+                        const boundingBox = landmarks.reduce(
+                            (box, landmark) => {
+                                return {
+                                    minX: Math.min(box.minX, landmark.x),
+                                    minY: Math.min(box.minY, landmark.y),
+                                    maxX: Math.max(box.maxX, landmark.x),
+                                    maxY: Math.max(box.maxY, landmark.y),
+                                };
+                            },
+                            { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+                        );
+
+                        context.strokeStyle = 'red';
+                        context.lineWidth = 2;
+                        context.strokeRect(
+                            boundingBox.minX * canvas.width,
+                            boundingBox.minY * canvas.height,
+                            (boundingBox.maxX - boundingBox.minX) * canvas.width,
+                            (boundingBox.maxY - boundingBox.minY) * canvas.height
+                        );
+
+                        // Draw points for Eyes and Ears
+                        const drawLandmark = (index: number, color: string) => {
+                            const x = landmarks[index].x * canvas.width;
+                            const y = landmarks[index].y * canvas.height;
+                            context.fillStyle = color;
+                            context.beginPath();
+                            context.arc(x, y, 3, 0, 2 * Math.PI);
+                            context.fill();
+                        };
+
+                        const leftEyeIndices = [33, 133, 145, 153, 160, 159, 158, 157, 173, 246];
+                        const rightEyeIndices = [362, 263, 387, 373, 380, 374, 373, 390, 388, 466];
+
+                        const drawLandmarks = (indices: number[], color: string) => {
+                            indices.forEach(index => drawLandmark(index, color));
+                        };
+
+                        drawLandmarks(leftEyeIndices, 'green');
+                        drawLandmarks(rightEyeIndices, 'green');
+
+                        drawLandmark(234, 'orange'); // Left ear
+                        drawLandmark(454, 'orange'); // Right Ear
+                    }
                 });
-                camera.start();
-            }
-
-            console.log('navigator face detection:', faceMeshInstance);
-        }
-
-        return () => {
-            if (violationTimeout.current) {
-                clearTimeout(violationTimeout.current);
-            }
-            if (faceOffScreenTimeout.current) {
-                clearTimeout(faceOffScreenTimeout.current);
-            }
-            if (multipleFacesTimeout.current) {
-                clearTimeout(multipleFacesTimeout.current);
-            }
-            if (downStareTimeout.current) {
-                clearTimeout(downStareTimeout.current);
+            } else {
+                setFaceDetected(false);
+                if (!violationTimeout.current) {
+                    resetTimeout(violationTimeout, incrementViolations, 5000);
+                }
             }
         };
-    }, []);
+
+        faceMeshInstance.onResults(onResults);
+
+        const initializeCamera = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                if (webcamRef.current && webcamRef.current.video) {
+                    webcamRef.current.video.srcObject = stream;
+
+                    const camera = new camUtils.Camera(webcamRef.current.video, {
+                        onFrame: async () => {
+                            if (webcamRef.current && webcamRef.current.video) {
+                                await faceMeshInstance.send({ image: webcamRef.current.video });
+                            }
+                        },
+                        width: 1280,
+                        height: 720,
+                        facingMode: "user",
+                    });
+                    camera.start();
+                }
+            } catch (error) {
+                console.error("Error accessing media devices.", error);
+                setCameraAccessDenied(true);
+            }
+        };
+
+        initializeCamera();
+
+        const webcamElement = webcamRef.current;
+
+        return () => {
+            // Clear all timeouts
+            [violationTimeout, multipleFacesTimeout, downStareTimeout].forEach(timeoutRef => {
+                if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                }
+            });
+
+            // Stop the camera stream using the local variable `webcamElement`
+            if (webcamElement && webcamElement.video && webcamElement.video.srcObject) {
+                (webcamElement.video.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+            }
+
+            faceMeshInstance.close();
+        };
+    }, [incrementViolations]);
 
     return (
         <div>
@@ -405,7 +379,7 @@ const TSHome = () => {
                 <h2 className="text-2xl font-bold text-center mb-4">Violation Images</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {violationImages.map((imageSrc, index) => (
-                        <Image width={360} height={240} key={index} src={imageSrc} alt={`Violation ${index + 1}`} className="w-full rounded shadow-md" />
+                        <Image width={360} height={240} key={index} src={imageSrc} alt={`Violation`} className="w-full rounded shadow-md" />
                     ))}
                 </div>
             </div>
@@ -448,12 +422,11 @@ const TSHome = () => {
             {multipleFacesDetected && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
                     <div className="bg-white p-8 rounded shadow-md text-center">
-                        <h2 className="text-2xl font-bold text-red-500 mb-4">Multiple Face Detected</h2>
+                        <h2 className="text-2xl font-bold text-red-500 mb-4">Multiple Faces Detected</h2>
                         <p className="text-lg">Please ensure only one person is in view.</p>
                     </div>
                 </div>
             )}
-
         </div>
     );
 };

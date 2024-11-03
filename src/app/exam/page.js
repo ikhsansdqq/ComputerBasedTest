@@ -1,7 +1,4 @@
 import dynamic from "next/dynamic";
-import Link from "next/link";
-
-import Navbar from "@/components/Navbar";
 
 const ClientOnlyComponent = dynamic(() => import("@/components/ClientOnlyComponent"), {
   ssr: false,
@@ -10,7 +7,6 @@ const ClientOnlyComponent = dynamic(() => import("@/components/ClientOnlyCompone
 const ScriptPage = () => {
   return (
     <div>
-      {/* <Navbar /> */}
       <ClientOnlyComponent />;
     </div>
   )

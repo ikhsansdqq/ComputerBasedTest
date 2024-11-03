@@ -6,7 +6,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ]
     },
     "allowJs": true,
@@ -36,8 +36,10 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
-, "src/components/Archive/main/src/components/Archive/page.jsive/page.js", "src/app/old-page.js"  ],
+    ".next/types/**/*.ts",
+    "src/components/Archive/page.js",
+    "src/app/old-page.js"
+  ],
   "exclude": [
     "node_modules"
   ]
